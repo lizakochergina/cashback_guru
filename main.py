@@ -11,11 +11,12 @@ TOKEN = '6436284246:AAEb8aEUhFvIegTMMa77mJ2gxYCQJDiuujc'
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
-data_manager = DataManager()
 
 
 async def on_startup(_):
     await db.db_connect()
+
+data_manager = DataManager()
 
 
 class Profile(StatesGroup):
