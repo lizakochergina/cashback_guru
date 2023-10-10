@@ -17,7 +17,6 @@ class DataManager:
         self.items = load_items_data()
         self.interactions = load_interactions_data()
 
-
         self.users.to_csv('users.csv', index=False)
         self.items.to_csv('items.csv', index=False)
         self.interactions.to_csv('interactions.csv', index=False)
@@ -41,9 +40,7 @@ class DataManager:
         probs = probs / np.sum(probs)
 
         sampled_items = np.random.choice(items_from_fav_categ + rest_items, size=k + 1, p=probs, replace=False)
-        print(sampled_items)
-        #used_items = self.items[self.interactions['user_id'] == user_id, 'item_id'].values
-        used_items = []
+        used_items = self.interactions.loc[self.interactions['user_id'] == user_id, 'item_id'].values
 
         clean_sampled_items = []
         for item in sampled_items:
