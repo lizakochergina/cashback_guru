@@ -1,5 +1,7 @@
 import sqlite3 as sql
 import pandas as pd
+import datetime
+import numpy as np
 
 
 db = sql.connect('recsys.db')
@@ -64,15 +66,31 @@ async def write_categories(user_id, new_categories):
 
 
 def load_users_data():
-    df = pd.read_sql_query("SELECT * FROM users", db)
+    df = pd.read_sql_query(
+        "SELECT * FROM users",
+        db,
+        dtype={'user_id': np.uint64, 'age': np.uint64, 'gender': str, 'time_added': datetime,
+               'kids_flag': str, 'pets_flag': str, 'feedback': np.uint64}
+    )
     return df
 
 
 def load_items_data():
-    df = pd.read_sql_query("SELECT * FROM items", db)
+    # df = pd.read_sql_query(
+    #     "SELECT * FROM items",
+    #     db,
+    #     dtype={'item_id': np.uint64, 'category': str, 'brand': str, 'percent': np.uint64,
+    #            'first_time': np.uint64, 'text_info': str, 'days_left': np.uint64 ,'img_url': str
+    # })
+    df = pd.read_csv('items.csv', dtype={'item_id': np.uint64, 'category': str, 'brand': str,
+                                         'percent': np.uint64,'first_time': np.uint64, 'text_info': str,
+                                         'days_left': np.uint64 ,'img_url': str}).set_index('item_id')
     return df
 
 
 def load_interactions_data():
-    df = pd.read_sql_query("SELECT * FROM interactions", db)
+    df = pd.read_sql_query(
+        "SELECT * FROM interactions",
+        db,
+        dtype={'user_id': np.uint64, 'item_id': np.uint64, 'feedback': np.uint64, 'timestamp': datetime})
     return df

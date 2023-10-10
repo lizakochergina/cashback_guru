@@ -25,7 +25,7 @@ class DataManager:
 
     def get_first_recs(self, user_id, k=1):
         print(self.users.loc[user_id])
-        users_fav_categories = self.users.loc[user_id, 'preferences'].split(";")
+        users_fav_categories = self.users.loc[self.users['user_id'] == user_id, 'preferences'].split(";")
         print(users_fav_categories)
         if self.users.loc[self.users['user_id'] == user_id, 'kids_flag'] == "Да":
             users_fav_categories.append('Товары для детей')
@@ -41,7 +41,7 @@ class DataManager:
         probs = [2] * n_fav + [1] * n_rest
         probs = probs / np.sum(probs)
 
-        sampled_items = np.random_choice(items_from_fav_categ + rest_items, size=k + 10, p=probs, replace=False)
+        sampled_items = np.random.choice(items_from_fav_categ + rest_items, size=k + 10, p=probs, replace=False)
         used_items = self.items[self.interactions['user_id'] == user_id, 'item_id'].values
 
         clean_sampled_items = []
