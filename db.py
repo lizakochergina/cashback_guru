@@ -42,7 +42,7 @@ async def get_categories(user_id):
     fav_categories = cursor.execute(
         "SELECT preferences FROM users WHERE user_id == '{key}'".format(
             key=user_id)).fetchone()[0]
-    delimiter = ','
+    delimiter = ';'
     if fav_categories == "":
         return list()
     fav_categories = fav_categories.split(delimiter)
@@ -50,9 +50,8 @@ async def get_categories(user_id):
 
 
 async def write_categories(user_id, new_categories):
-    delimiter = ','
+    delimiter = ';'
     new_categories = delimiter.join(new_categories)
-    print(f"new categories: {new_categories}")
     cursor.execute(
         "UPDATE users SET preferences = '{}' WHERE user_id = '{}'".format(
             new_categories, user_id))
@@ -72,3 +71,5 @@ async def load_items_data():
 async def load_interactions_data():
     df = pd.read_sql_query("SELECT * FROM interactions", db)
     return df
+
+# async def show_recomendation():
