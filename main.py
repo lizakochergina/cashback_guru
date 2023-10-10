@@ -51,10 +51,11 @@ async def show_recommendations(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     rec_item_id = data_manager.get_first_recs(user_id)
 
-    # img_url, category, text_info = data_manager.get_item_data(rec_item_id)
-    img_url = 'pics/nutella.png'
-    text_info = 'Nutella\n\nNutella - ореховая паста с какао и снеки с Nutella.\n\nКэшбек 10%\n\nЧтобы получить бонусы, после покупки добавьте чек в приложение Тинькофф: нажмите на транзакцию и отсканируйте QR-код с чека.\nУсловия:\nАкция действует на все товары Nutella во всех офлайн- и онлайн-магазинах, кроме маркетплейсов «Мегамаркет», «Яндекс Маркет», Ozon, Wildberries.\nМаксимум за всё время акции — 500 бонусов.\nБонусы рассчитываются в течение 10 дней после покупки.'
+    img_url, category, text_info = data_manager.get_item_data(rec_item_id)
+    # img_url = 'pics/nutella.png'
+    # text_info = 'Nutella\n\nNutella - ореховая паста с какао и снеки с Nutella.\n\nКэшбек 10%\n\nЧтобы получить бонусы, после покупки добавьте чек в приложение Тинькофф: нажмите на транзакцию и отсканируйте QR-код с чека.\nУсловия:\nАкция действует на все товары Nutella во всех офлайн- и онлайн-магазинах, кроме маркетплейсов «Мегамаркет», «Яндекс Маркет», Ozon, Wildberries.\nМаксимум за всё время акции — 500 бонусов.\nБонусы рассчитываются в течение 10 дней после покупки.'
 
+    print(img_url)
     with open(img_url, 'rb') as photo:
         photo = InputFile(photo)
         await bot.send_photo(user_id, photo, caption=text_info)

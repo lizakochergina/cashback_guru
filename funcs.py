@@ -53,4 +53,5 @@ class DataManager:
 
     def get_item_data(self, item_id):
         row = self.items.loc[self.items['item_id'] == item_id]
-        return row['img_url'], row['preferences'], row['text_info']
+        print(row)
+        return row['img_url'].values[0], row['category'].values[0], row['text_info'].values[0]
