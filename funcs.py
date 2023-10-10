@@ -24,7 +24,7 @@ class DataManager:
         self.n_items = len(self.items)
 
     def get_first_recs(self, user_id, k=1):
-        print(self.users.loc[user_id])
+        user_id = int(user_id)
         users_fav_categories = self.users.loc[self.users['user_id'] == user_id, 'preferences'].split(";")
         print(users_fav_categories)
         if self.users.loc[self.users['user_id'] == user_id, 'kids_flag'] == "Да":

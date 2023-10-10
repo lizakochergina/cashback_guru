@@ -85,7 +85,7 @@ def load_items_data():
     # })
     df = pd.read_csv('items.csv', dtype={'item_id': np.uint64, 'category': str, 'brand': str,
                                          'percent': np.uint64, 'first_time': np.uint64, 'text_info': str,
-                                         'days_left': np.uint64, 'img_url': str}).set_index('item_id')
+                                         'days_left': np.uint64, 'img_url': str})
     return df
 
 
