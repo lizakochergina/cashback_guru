@@ -1,4 +1,5 @@
 import sqlite3 as sql
+import pandas as pd
 
 
 async def db_connect():
@@ -36,7 +37,6 @@ async def create_profile(state, user_id):
     else:
         pass
 
-
 async def get_categories(user_id):
     fav_categories = cursor.execute(
         "SELECT preferences FROM users WHERE user_id == '{key}'".format(
@@ -56,3 +56,17 @@ async def write_categories(user_id, new_categories):
         "UPDATE users SET preferences = '{}' WHERE user_id = '{}'".format(
             new_categories, user_id))
     db.commit()
+
+async def load_users_data():
+    df = pd.read_sql_query("SELECT * FROM users", db)
+    return df
+
+
+async def load_items_data():
+    df = pd.read_sql_query("SELECT * FROM items", db)
+    return df
+
+
+async def load_interactions_data():
+    df = pd.read_sql_query("SELECT * FROM interactions", db)
+    return df
