@@ -72,7 +72,7 @@ def load_users_data():
         db,
         dtype={'user_id': np.uint64, 'age': np.uint64, 'gender': str, 'time_added': str,
                'kids_flag': str, 'pets_flag': str, 'feedback': np.uint64}
-    )
+    ).set_index("user_id")
     return df
 
 

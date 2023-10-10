@@ -49,7 +49,7 @@ async def create_subjects_keyboard(user_id):
 @dp.callback_query_handler(lambda c: c.data == 'show_recommendations')
 async def show_recommendations(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
-    rec_item_id = await data_manager.get_first_recs(user_id)
+    rec_item_id = data_manager.get_first_recs(user_id)
 
     # img_url, category, text_info = data_manager.get_item_data(item_id)
     img_url = 'pics/nutella.png'
@@ -64,7 +64,7 @@ async def show_recommendations(callback_query: types.CallbackQuery):
     button2 = InlineKeyboardButton("❤", callback_data="button2")
     keyboard.add(button1, button2)
 
-    await bot.send_message(user_id, reply_markup=keyboard)
+    await bot.send_message(user_id, "Пожалуйста, оцени качество рекомендации.", reply_markup=keyboard)
 
 
 @dp.message_handler(lambda message: message.text == "Выбрать любимые категории",
