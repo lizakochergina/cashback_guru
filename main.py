@@ -65,18 +65,6 @@ async def show_recs(user_id):
 async def show_recs_from_callback(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     await show_recs(user_id)
-    # rec_item_id = data_manager.get_first_recs(user_id)
-    #
-    # img_url, category, text_info = data_manager.get_item_data(rec_item_id)
-    #
-    # keyboard = InlineKeyboardMarkup()
-    # button1 = InlineKeyboardButton("💔", callback_data=f"button1:{rec_item_id}")
-    # button2 = InlineKeyboardButton("❤", callback_data=f"button2:{rec_item_id}")
-    # keyboard.add(button1, button2)
-    #
-    # with open(img_url, 'rb') as photo:
-    #     photo = InputFile(photo)
-    #     await bot.send_photo(user_id, photo, caption=text_info, reply_markup=keyboard)
 
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('button'))
@@ -135,7 +123,7 @@ async def process_start_command(message: types.Message):
         await Profile.age.set()
 
 
-# Заполнение возраста
+# fill age
 @dp.message_handler(state=Profile.age)
 async def get_age(message, state):
     if message.text.isdigit() and 1 <= int(message.text) <= 120:
@@ -153,7 +141,7 @@ async def get_age(message, state):
         await message.answer('Пожалуйста, введи настоящий возраст')
 
 
-# Заполнение гендера
+# fill sex
 @dp.message_handler(state=Profile.gender)
 async def get_gender(message, state):
     user_id = message.from_user.id
@@ -169,7 +157,7 @@ async def get_gender(message, state):
     await Profile.next()
 
 
-# Заполнение индикатора животных
+# fill pets flag
 @dp.message_handler(state=Profile.pets_flag)
 async def get_pets(message, state):
     user_id = message.from_user.id
@@ -184,7 +172,7 @@ async def get_pets(message, state):
     await Profile.next()
 
 
-# Заполнение детей
+# fill kids flag
 @dp.message_handler(state=Profile.kids_flag)
 async def get_kids(message, state):
     user_id = message.from_user.id
