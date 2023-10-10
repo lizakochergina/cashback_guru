@@ -23,21 +23,23 @@ class Profile(StatesGroup):
     kids_flag = State()
 
 
-# Список предметов
-subjects = ['Математика', 'Физика', 'Химия', 'Биология', 'Информатика']
+subjects = ['Еда и продукты', 'Одежда и обувь', 'Дом и ремонт', 'Еда с доставкой',
+            'Цветы и подарки', 'Обучение', 'Аптеки и медицина', 'Авто', 'Красота и парфюмерия',
+            'Электроника', 'Кафе, бары и рестораны', 'Товары для животных', 'Спорт', 'Уход за собой',
+            'Хобби и равлечения', 'Услуги и сервис', 'Путешествия', 'Такси и каршеринг',
+            'Ювелирные изледия и часы', 'Товары для детей', 'Оптика', 'Книги, кино, искусство']
 
 
 async def create_subjects_keyboard(user_id):
     keyboard = InlineKeyboardMarkup()
     selected_subjects = await db.get_categories(user_id)
-    print(selected_subjects)
-    print(f'selected: {selected_subjects}')
     for subject in subjects:
         # Если предмет уже выбран, делаем кнопку неактивной
         if subject in selected_subjects:
             keyboard.add(InlineKeyboardButton(f'✅ {subject}', callback_data=f'subject:{subject}:unselect'))
         else:
             keyboard.add(InlineKeyboardButton(f'❌ {subject}', callback_data=f'subject:{subject}:select'))
+    keyboard.add(InlineKeyboardButton(text="Готово", callback_data=f'subject:{""}:done'))
     return keyboard
 
 
@@ -45,8 +47,8 @@ async def create_subjects_keyboard(user_id):
                     state="*")
 async def process_start_command(message: types.Message):
     user_id = message.from_user.id
-    await message.reply("Выбери свои любимые предметы:", reply_markup=await create_subjects_keyboard(user_id))
-
+    keyboard = await create_subjects_keyboard(user_id)
+    await message.answer(text="Выбери свои любимые категории:", reply_markup=keyboard)
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('subject:'))
 async def process_subject_callback(callback_query: types.CallbackQuery):
@@ -57,13 +59,17 @@ async def process_subject_callback(callback_query: types.CallbackQuery):
         selected_subjects.append(subject)
     elif action == 'unselect':
         selected_subjects.remove(subject)
+    elif action == "done":
+        keyboard = InlineKeyboardMarkup()
+        keyboard.add(InlineKeyboardButton(text="Показать рекомендации", callback_data="show_recommendations"))
+        await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id,
+                                            reply_markup=keyboard)
     await db.write_categories(user_id, selected_subjects)
     new_keyboard = await create_subjects_keyboard(user_id)
     if new_keyboard.inline_keyboard != callback_query.message.reply_markup.inline_keyboard:
         await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id,
                                             reply_markup=new_keyboard)
-
-    await bot.answer_callback_query(callback_query.id, f'Ты выбрал предметы: {", ".join(selected_subjects)}')
+    # await bot.answer_callback_query(callback_query.id, f'Ты выбрал предметы: {", ".join(selected_subjects)}')
 
 
 @dp.message_handler(commands=['start'])
