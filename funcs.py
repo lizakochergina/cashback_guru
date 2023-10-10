@@ -17,6 +17,7 @@ class DataManager:
         self.items = load_items_data()
         self.interactions = load_interactions_data()
 
+
         self.users.to_csv('users.csv', index=False)
         self.items.to_csv('items.csv', index=False)
         self.interactions.to_csv('interactions.csv', index=False)
@@ -24,25 +25,25 @@ class DataManager:
         self.n_items = len(self.items)
 
     def get_first_recs(self, user_id, k=1):
-        print(self.users.loc[user_id])
-        users_fav_categories = self.users.loc[self.users['user_id'] == user_id, 'preferences'].split(";")
-        print(users_fav_categories)
-        if self.users.loc[self.users['user_id'] == user_id, 'kids_flag'] == "Да":
+        users_fav_categories = self.users.loc[user_id, 'preferences'].split(";")
+        if self.users.loc[user_id, 'kids_flag'] == "Да":
             users_fav_categories.append('Товары для детей')
-        if self.users.loc[self.users['user_id'] == user_id, 'pets_flag'] == "Да":
+        if self.users.loc[user_id, 'pets_flag'] == "Да":
             users_fav_categories.append('Товары для животных')
 
         items_from_fav_categ = self.items.loc[
-            self.items['preferences'].isin(users_fav_categories), 'item_id'].values.tolist()
-        rest_items = self.items.loc[~self.items['preferences'].isin(users_fav_categories), 'item_id'].values.tolist()
+            self.items['category'].isin(users_fav_categories), 'item_id'].values.tolist()
+        rest_items = self.items.loc[~self.items['category'].isin(users_fav_categories), 'item_id'].values.tolist()
         n_fav = len(items_from_fav_categ)
         n_rest = self.n_items - n_fav
 
         probs = [2] * n_fav + [1] * n_rest
         probs = probs / np.sum(probs)
 
-        sampled_items = np.random.choice(items_from_fav_categ + rest_items, size=k + 10, p=probs, replace=False)
-        used_items = self.items[self.interactions['user_id'] == user_id, 'item_id'].values
+        sampled_items = np.random.choice(items_from_fav_categ + rest_items, size=k + 1, p=probs, replace=False)
+        print(sampled_items)
+        #used_items = self.items[self.interactions['user_id'] == user_id, 'item_id'].values
+        used_items = []
 
         clean_sampled_items = []
         for item in sampled_items:
