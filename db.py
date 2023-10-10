@@ -1,20 +1,22 @@
 import sqlite3 as sql
 import pandas as pd
 
-db = None
-cursor = None
 
+db = sql.connect('recsys.db')
+cursor = db.cursor()
 
 async def db_connect():
     # global db, cursor
-    db = sql.connect('recsys.db')
-    cursor = db.cursor()
+    # db = sql.connect('recsys.db')
+    # cursor = db.cursor()
     query = "CREATE TABLE IF NOT EXISTS users(user_id TEXT PRIMARY KEY, age INTEGER, gender TEXT, preferences TEXT," \
             "time_added TEXT, kids_flag TEXT, pets_flag TEXT, feedback INTEGER)"
     query2 = "CREATE TABLE IF NOT EXISTS items(item_id TEXT PRIMARY KEY, category TEXT, brand TEXT, " \
-             "percent INTEGER, first_time INTEGER, text_info TEXT, days_left INTEGER)"
+             "percent INTEGER, first_time INTEGER, text_info TEXT, days_left INTEGER, img_url TEXT)"
+    query3 = "CREATE TABLE IF NOT EXISTS interactions(user_id TEXT PRIMARY KEY, item_id TEXT, feedback TEXT, timestamp TEXT)"
     cursor.execute(query)
     cursor.execute(query2)
+    cursor.execute(query3)
     db.commit()
 
 
