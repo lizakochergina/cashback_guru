@@ -9,7 +9,7 @@ class DataManager:
             need to load data from database
 
             users = pd.DataFrame(cols={user_id, age, sex, kids, pets, categories})
-            items = pd.DataFrame(cols={item_id, name, categories, promo, text_info, img_url,
+            items = pd.DataFrame(cols={item_id, name, category, promo, text_info, img_url,
                                        first_time_only, exp_date, start_sum, restrictions})
             interactions = pd.DataFrame(cols={user_id, item_id, feedback, timestamp})
         """
@@ -19,7 +19,7 @@ class DataManager:
         self.interactions = load_interactions_data()
         self.n_items = len(self.items)
 
-    def get_first_recs(self, user_id, k=3):
+    def get_first_recs(self, user_id, k=1):
         users_fav_categories = self.users.loc[user_id, 'categories'].split()
         if self.users.loc[self.users['user_id'] == user_id, 'kids'] == 1:
             users_fav_categories.append('Товары для детей')
@@ -41,6 +41,13 @@ class DataManager:
         for item in sampled_items:
             if item not in used_items:
                 clean_sampled_items.append(item)
-        return clean_sampled_items[:k]
+        if k == 1:
+            return clean_sampled_items[0]
+        else:
+            return clean_sampled_items[:k]
+
+    def get_item_data(self, item_id):
+        row = self.items.loc[self.items['item_id'] == item_id]
+        return row['img_url'], row['category'], row['text_info']
 
 

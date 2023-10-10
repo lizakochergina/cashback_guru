@@ -1,15 +1,17 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils import executor
 from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, \
-    InlineKeyboardButton
+    InlineKeyboardButton, InputFile
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import db
+from funcs import DataManager
 
 TOKEN = '6436284246:AAEb8aEUhFvIegTMMa77mJ2gxYCQJDiuujc'
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
+data_manager = DataManager()
 
 
 async def on_startup(_):
@@ -43,6 +45,27 @@ async def create_subjects_keyboard(user_id):
         else:
             keyboard.add(InlineKeyboardButton(f'❌ {subject}', callback_data=f'subject:{subject}:select'))
     return keyboard
+
+
+@dp.callback_query_handler(lambda c: c.data == 'show_recommendations')
+async def show_recommendations(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+    rec_item_id = data_manager.get_first_recs(user_id)
+
+    # img_url, category, text_info = data_manager.get_item_data(item_id)
+    img_url = 'pics/nutella.png'
+    text_info = 'Nutella\n\nNutella - ореховая паста с какао и снеки с Nutella.\n\nКэшбек 10%\n\nЧтобы получить бонусы, после покупки добавьте чек в приложение Тинькофф: нажмите на транзакцию и отсканируйте QR-код с чека.\nУсловия:\nАкция действует на все товары Nutella во всех офлайн- и онлайн-магазинах, кроме маркетплейсов «Мегамаркет», «Яндекс Маркет», Ozon, Wildberries.\nМаксимум за всё время акции — 500 бонусов.\nБонусы рассчитываются в течение 10 дней после покупки.'
+
+    with open(img_url, 'rb') as photo:
+        photo = InputFile(photo)
+        await bot.send_photo(user_id, photo, caption=text_info)
+
+    keyboard = InlineKeyboardMarkup()
+    button1 = InlineKeyboardButton("💔", callback_data="button1")
+    button2 = InlineKeyboardButton("❤", callback_data="button2")
+    keyboard.add(button1, button2)
+
+    await bot.send_message(user_id, reply_markup=keyboard)
 
 
 @dp.message_handler(lambda message: message.text == "Выбрать любимые категории",
