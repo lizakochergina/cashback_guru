@@ -73,9 +73,11 @@ async def process_callback_button(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     button_number, item_id = callback_query.data.split(":")
     if button_number[-1] == '1':
-        db.write_feedback(user_id, int(item_id), -1, callback_query.message.date)
+        db.write_feedback(user_id, int(item_id), 0, callback_query.message.date)
+        data_manager.add_interaction(user_id, int(item_id), 0, callback_query.message.date)
     elif button_number[-1] == '2':
         db.write_feedback(user_id, int(item_id), 1, callback_query.message.date)
+        data_manager.add_interaction(user_id, int(item_id), 1, callback_query.message.date)
     await show_recommendations(callback_query)
 
 

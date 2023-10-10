@@ -41,11 +41,15 @@ class DataManager:
 
         sampled_items = np.random.choice(items_from_fav_categ + rest_items, size=k + 1, p=probs, replace=False)
         used_items = self.interactions.loc[self.interactions['user_id'] == user_id, 'item_id'].values
+        print(probs)
+        print('sampled', sampled_items)
+        print('used', used_items)
 
         clean_sampled_items = []
         for item in sampled_items:
             if item not in used_items:
                 clean_sampled_items.append(item)
+        print('clean', clean_sampled_items)
         if k == 1:
             return clean_sampled_items[0]
         else:
@@ -55,3 +59,7 @@ class DataManager:
         row = self.items.loc[self.items['item_id'] == item_id]
         print(row)
         return row['img_url'].values[0], row['category'].values[0], row['text_info'].values[0]
+
+    def add_interaction(self, user_id, item_id, feedback, timestamp):
+        n = len(self.interactions)
+        self.interactions.loc[n] = [user_id, item_id, feedback, timestamp]
