@@ -46,9 +46,7 @@ async def create_subjects_keyboard(user_id):
     return keyboard
 
 
-@dp.callback_query_handler(lambda c: c.data == 'show_recommendations')
-async def show_recommendations(callback_query: types.CallbackQuery):
-    user_id = callback_query.from_user.id
+async def show_recs(user_id):
     rec_item_id = data_manager.get_first_recs(user_id)
 
     img_url, category, text_info = data_manager.get_item_data(rec_item_id)
@@ -63,6 +61,24 @@ async def show_recommendations(callback_query: types.CallbackQuery):
         await bot.send_photo(user_id, photo, caption=text_info, reply_markup=keyboard)
 
 
+@dp.callback_query_handler(lambda c: c.data == 'show_recommendations')
+async def show_recs_from_callback(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+    await show_recs(user_id)
+    # rec_item_id = data_manager.get_first_recs(user_id)
+    #
+    # img_url, category, text_info = data_manager.get_item_data(rec_item_id)
+    #
+    # keyboard = InlineKeyboardMarkup()
+    # button1 = InlineKeyboardButton("💔", callback_data=f"button1:{rec_item_id}")
+    # button2 = InlineKeyboardButton("❤", callback_data=f"button2:{rec_item_id}")
+    # keyboard.add(button1, button2)
+    #
+    # with open(img_url, 'rb') as photo:
+    #     photo = InputFile(photo)
+    #     await bot.send_photo(user_id, photo, caption=text_info, reply_markup=keyboard)
+
+
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('button'))
 async def process_callback_button(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
@@ -73,7 +89,7 @@ async def process_callback_button(callback_query: types.CallbackQuery):
     elif button_number[-1] == '2':
         db.write_feedback(user_id, int(item_id), 1, callback_query.message.date)
         data_manager.add_interaction(user_id, int(item_id), 1, callback_query.message.date)
-    await show_recommendations(callback_query)
+    await show_recs_from_callback(callback_query)
 
 
 @dp.message_handler(lambda message: message.text == "Выбрать любимые категории",
@@ -104,14 +120,15 @@ async def process_subject_callback(callback_query: types.CallbackQuery):
     if new_keyboard.inline_keyboard != callback_query.message.reply_markup.inline_keyboard:
         await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id,
                                             reply_markup=new_keyboard)
-    # await bot.answer_callback_query(callback_query.id, f'Ты выбрал предметы: {", ".join(selected_subjects)}')
 
 
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
     if await db.user_exists(message.from_user.id):
         # send recs
-        await bot.send_message(message.from_user.id, "Рад видеть тебя снова!")
+        await bot.send_message(message.from_user.id, "Рад видеть тебя снова! Лови новые кэшбеки 💸💸💸")
+        await show_recs(message.from_user.id)
+
     else:
         await bot.send_message(message.from_user.id, "Привет!\nДля начала мне нужно узнать кое-что о тебе.")
         await message.answer("Укажи свой возраст:\n")
