@@ -1,17 +1,22 @@
 import sqlite3 as sql
 import pandas as pd
 
+db = sql.connect('recsys.db')
+cursor = db.cursor()
+
 
 async def db_connect():
-    global db, cursor  # это зачем
-    db = sql.connect('recsys.db')
-    cursor = db.cursor()
+    # global db, cursor
+    # db = sql.connect('recsys.db')
+    # cursor = db.cursor()
     query = "CREATE TABLE IF NOT EXISTS users(user_id TEXT PRIMARY KEY, age INTEGER, gender TEXT, preferences TEXT," \
             "time_added TEXT, kids_flag TEXT, pets_flag TEXT, feedback INTEGER)"
     query2 = "CREATE TABLE IF NOT EXISTS items(item_id TEXT PRIMARY KEY, category TEXT, brand TEXT, " \
-             "percent INTEGER, first_time INTEGER, text_info TEXT, days_left INTEGER)"
+             "percent INTEGER, first_time INTEGER, text_info TEXT, days_left INTEGER, img_url TEXT)"
+    query3 = "CREATE TABLE IF NOT EXISTS interactions(user_id TEXT PRIMARY KEY, item_id TEXT, feedback TEXT, timestamp TEXT)"
     cursor.execute(query)
     cursor.execute(query2)
+    cursor.execute(query3)
     db.commit()
 
 
@@ -58,17 +63,17 @@ async def write_categories(user_id, new_categories):
     db.commit()
 
 
-async def load_users_data():
+def load_users_data():
     df = pd.read_sql_query("SELECT * FROM users", db)
     return df
 
 
-async def load_items_data():
+def load_items_data():
     df = pd.read_sql_query("SELECT * FROM items", db)
     return df
 
 
-async def load_interactions_data():
+def load_interactions_data():
     df = pd.read_sql_query("SELECT * FROM interactions", db)
     return df
 

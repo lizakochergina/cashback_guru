@@ -48,7 +48,7 @@ async def create_subjects_keyboard(user_id):
 @dp.callback_query_handler(lambda c: c.data == 'show_recommendations')
 async def show_recommendations(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
-    rec_item_id = data_manager.get_first_recs(user_id)
+    rec_item_id = await data_manager.get_first_recs(user_id)
 
     # img_url, category, text_info = data_manager.get_item_data(item_id)
     img_url = 'pics/nutella.png'
