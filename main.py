@@ -24,7 +24,11 @@ class Profile(StatesGroup):
 
 
 # Список предметов
-subjects = ['Математика', 'Физика', 'Химия', 'Биология', 'Информатика']
+categories = ['Еда и продукты', 'Одежда, обувь', 'Дом и ремонт', 'Еда с доставкой',
+            'Цветы и подарки', 'Обучение', 'Аптеки и медицина', 'Авто', 'Красота и парфюмерия',
+            'Электроника', 'Кафе, бары и рестораны', 'Товары для животных', 'Спорт', 'Уход за собой',
+            'Хобби и равлечения', 'Услуги и сервис', 'Путешествия', 'Такси и каршеринг',
+            'Ювелирные изледия и часы', 'Товары для детей', 'Оптика', 'Книги, кино, искусство']
 
 
 async def create_subjects_keyboard(user_id):
@@ -32,7 +36,7 @@ async def create_subjects_keyboard(user_id):
     selected_subjects = await db.get_categories(user_id)
     print(selected_subjects)
     print(f'selected: {selected_subjects}')
-    for subject in subjects:
+    for subject in categories:
         # Если предмет уже выбран, делаем кнопку неактивной
         if subject in selected_subjects:
             keyboard.add(InlineKeyboardButton(f'✅ {subject}', callback_data=f'subject:{subject}:unselect'))
