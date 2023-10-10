@@ -60,11 +60,22 @@ async def show_recommendations(callback_query: types.CallbackQuery):
         await bot.send_photo(user_id, photo, caption=text_info)
 
     keyboard = InlineKeyboardMarkup()
-    button1 = InlineKeyboardButton("💔", callback_data="button1")
-    button2 = InlineKeyboardButton("❤", callback_data="button2")
+    button1 = InlineKeyboardButton("💔", callback_data=f"button1:{rec_item_id}")
+    button2 = InlineKeyboardButton("❤", callback_data=f"button2:{rec_item_id}")
     keyboard.add(button1, button2)
 
     await bot.send_message(user_id, "Пожалуйста, оцени качество рекомендации.", reply_markup=keyboard)
+
+
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('button'))
+async def process_callback_button(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+    button_number, item_id = callback_query.data.split(":")
+    if button_number[-1] == '1':
+        db.write_feedback(user_id, int(item_id), -1, callback_query.message.date)
+    elif button_number[-1] == '2':
+        db.write_feedback(user_id, int(item_id), 1, callback_query.message.date)
+    await show_recommendations(callback_query)
 
 
 @dp.message_handler(lambda message: message.text == "Выбрать любимые категории",

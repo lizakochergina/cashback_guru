@@ -95,3 +95,13 @@ def load_interactions_data():
         db,
         dtype={'user_id': np.uint64, 'item_id': np.uint64, 'feedback': np.uint64, 'timestamp': str})
     return df
+
+
+def write_feedback(user_id, item_id,  reaction, timestamp):
+    cursor.execute(
+        "UPDATE users SET feedback = '{}' WHERE user_id = '{}'".format(
+            1, user_id))
+    cursor.execute(
+        "INSERT INTO interactions (user_id, item_id, feedback, timestamp) VALUES(?, ?, ?, ?)",
+        (user_id, item_id, reaction, timestamp))
+    db.commit()
