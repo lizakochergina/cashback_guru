@@ -26,13 +26,11 @@ class Profile(StatesGroup):
 # Список предметов
 subjects = ['Математика', 'Физика', 'Химия', 'Биология', 'Информатика']
 
-# Словарь для хранения выборов пользователей
-user_choices = {}
 
-
-def create_subjects_keyboard(user_id):
+async def create_subjects_keyboard(user_id):
     keyboard = InlineKeyboardMarkup()
-    selected_subjects = user_choices.get(user_id, [])  # Получаем предпочтения пользователя
+    selected_subjects = await db.get_categories(user_id)
+    print(selected_subjects)
     print(f'selected: {selected_subjects}')
     for subject in subjects:
         # Если предмет уже выбран, делаем кнопку неактивной
@@ -47,21 +45,20 @@ def create_subjects_keyboard(user_id):
                     state="*")
 async def process_start_command(message: types.Message):
     user_id = message.from_user.id
-    user_choices.setdefault(user_id, [])  # Инициализируем предпочтения пользователя, если их нет
-    await message.reply("Выбери свои любимые предметы:", reply_markup=create_subjects_keyboard(user_id))
+    await message.reply("Выбери свои любимые предметы:", reply_markup=await create_subjects_keyboard(user_id))
 
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('subject:'))
 async def process_subject_callback(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     subject, action = callback_query.data.split(':')[1:]
-    selected_subjects = user_choices.get(user_id)
+    selected_subjects = await db.get_categories(user_id)
     if action == 'select':
         selected_subjects.append(subject)
     elif action == 'unselect':
         selected_subjects.remove(subject)
-    user_choices[user_id] = selected_subjects
-    new_keyboard = create_subjects_keyboard(user_id)
+    await db.write_categories(user_id, selected_subjects)
+    new_keyboard = await create_subjects_keyboard(user_id)
     if new_keyboard.inline_keyboard != callback_query.message.reply_markup.inline_keyboard:
         await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id,
                                             reply_markup=new_keyboard)
@@ -90,7 +87,7 @@ async def get_age(message, state):
         male = KeyboardButton('Мужчина')
         buttons = ReplyKeyboardMarkup(one_time_keyboard=True)
         buttons.add(female, male)
-        await message.answer('Выбери свой гендер', reply_markup=buttons)
+        await message.answer('Выбери свой пол', reply_markup=buttons)
         await Profile.next()
     else:
         await message.answer('Пожалуйста, введи настоящий возраст')
@@ -125,7 +122,7 @@ async def get_pets(message, state):
 
 # Заполнение детей
 @dp.message_handler(state=Profile.kids_flag)
-async def create_profile_description(message, state):
+async def get_kids(message, state):
     async with state.proxy() as data:
         data['kids_flag'] = message.text
         data['creation_time'] = message.date
