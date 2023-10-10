@@ -23,10 +23,9 @@ class Profile(StatesGroup):
     kids_flag = State()
 
 
-subjects = ['Еда и продукты', 'Одежда и обувь', 'Дом и ремонт', 'Еда с доставкой',
+categories = ['Еда и продукты', 'Одежда, обувь', 'Дом и ремонт', 'Еда с доставкой',
             'Цветы и подарки', 'Обучение', 'Аптеки и медицина', 'Авто', 'Красота и парфюмерия',
-            'Электроника', 'Кафе, бары и рестораны', 'Товары для животных', 'Спорт', 'Уход за собой',
-            'Хобби и равлечения', 'Услуги и сервис', 'Путешествия', 'Такси и каршеринг',
+            'Электроника', 'Кафе, бары и рестораны', 'Товары для животных', 'Спорт', 'Уход за собой', 'Хобби и равлечения', 'Услуги и сервис', 'Путешествия', 'Такси и каршеринг',
             'Ювелирные изледия и часы', 'Товары для детей', 'Оптика', 'Книги, кино, искусство']
 
 
@@ -34,6 +33,10 @@ async def create_subjects_keyboard(user_id):
     keyboard = InlineKeyboardMarkup()
     selected_subjects = await db.get_categories(user_id)
     for subject in subjects:
+    print(selected_subjects)
+    print(f'selected: {selected_subjects}')
+    for subject in categories:
+>>>>>>> 44ee44a8a8ae8174fa82d43f5c31c62c1c44bd67
         # Если предмет уже выбран, делаем кнопку неактивной
         if subject in selected_subjects:
             keyboard.add(InlineKeyboardButton(f'✅ {subject}', callback_data=f'subject:{subject}:unselect'))
