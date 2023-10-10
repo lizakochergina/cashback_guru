@@ -24,23 +24,21 @@ class Profile(StatesGroup):
 
 
 categories = ['Еда и продукты', 'Одежда, обувь', 'Дом и ремонт', 'Еда с доставкой',
-            'Цветы и подарки', 'Обучение', 'Аптеки и медицина', 'Авто', 'Красота и парфюмерия',
-            'Электроника', 'Кафе, бары и рестораны', 'Товары для животных', 'Спорт', 'Уход за собой', 'Хобби и равлечения', 'Услуги и сервис', 'Путешествия', 'Такси и каршеринг',
-            'Ювелирные изледия и часы', 'Товары для детей', 'Оптика', 'Книги, кино, искусство']
+              'Цветы и подарки', 'Обучение', 'Аптеки и медицина', 'Авто', 'Красота и парфюмерия',
+              'Электроника', 'Кафе, бары и рестораны', 'Товары для животных', 'Спорт', 'Уход за собой',
+              'Хобби и равлечения', 'Услуги и сервис', 'Путешествия', 'Такси и каршеринг',
+              'Ювелирные изледия и часы', 'Товары для детей', 'Оптика', 'Книги, кино, искусство']
 
 
 async def create_subjects_keyboard(user_id):
     keyboard = InlineKeyboardMarkup()
-    selected_subjects = await db.get_categories(user_id)
-    for subject in subjects:
-    print(selected_subjects)
-    print(f'selected: {selected_subjects}')
-    for subject in categories:
+    selected_categories = await db.get_categories(user_id)
+    for category in categories:
         # Если предмет уже выбран, делаем кнопку неактивной
-        if subject in selected_subjects:
-            keyboard.add(InlineKeyboardButton(f'✅ {subject}', callback_data=f'subject:{subject}:unselect'))
+        if category in selected_categories:
+            keyboard.add(InlineKeyboardButton(f'✅ {category}', callback_data=f'subject:{category}:unselect'))
         else:
-            keyboard.add(InlineKeyboardButton(f'❌ {subject}', callback_data=f'subject:{subject}:select'))
+            keyboard.add(InlineKeyboardButton(f'❌ {category}', callback_data=f'subject:{category}:select'))
     keyboard.add(InlineKeyboardButton(text="Готово", callback_data=f'subject:{""}:done'))
     return keyboard
 
@@ -51,6 +49,7 @@ async def process_start_command(message: types.Message):
     user_id = message.from_user.id
     keyboard = await create_subjects_keyboard(user_id)
     await message.answer(text="Выбери свои любимые категории:", reply_markup=keyboard)
+
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('subject:'))
 async def process_subject_callback(callback_query: types.CallbackQuery):
