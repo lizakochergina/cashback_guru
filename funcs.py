@@ -16,10 +16,17 @@ class DataManager:
         self.users = load_users_data()
         self.items = load_items_data()
         self.interactions = load_interactions_data()
+
+        self.users.to_csv('users.csv', index=False)
+        self.items.to_csv('items.csv', index=False)
+        self.interactions.to_csv('interactions.csv', index=False)
+
         self.n_items = len(self.items)
 
     def get_first_recs(self, user_id, k=1):
-        users_fav_categories = self.users.loc[user_id, 'preferences'].split()
+        print(self.users.loc[user_id])
+        users_fav_categories = self.users.loc[user_id, 'preferences'].split(";")
+        print(users_fav_categories)
         if self.users.loc[self.users['user_id'] == user_id, 'kids_flag'] == "Да":
             users_fav_categories.append('Товары для детей')
         if self.users.loc[self.users['user_id'] == user_id, 'pets_flag'] == "Да":
