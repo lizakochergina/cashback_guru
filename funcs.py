@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from db import load_users_data, load_items_data, load_interactions_data
 
 
 class DataManager:
@@ -13,11 +14,10 @@ class DataManager:
             interactions = pd.DataFrame(cols={user_id, item_id, feedback, timestamp})
         """
 
-        self.users = None
-        self.items = None
-        self.interactions = None
+        self.users = load_users_data()
+        self.items = load_items_data()
+        self.interactions = load_interactions_data()
         self.n_items = len(self.items)
-        self.fav_sum_prob = 0.65
 
     def get_first_recs(self, user_id, k=3):
         users_fav_categories = self.users.loc[user_id, 'categories'].split()
