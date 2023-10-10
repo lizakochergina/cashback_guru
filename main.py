@@ -53,16 +53,14 @@ async def show_recommendations(callback_query: types.CallbackQuery):
 
     img_url, category, text_info = data_manager.get_item_data(rec_item_id)
 
-    with open(img_url, 'rb') as photo:
-        photo = InputFile(photo)
-        await bot.send_photo(user_id, photo, caption=text_info)
-
     keyboard = InlineKeyboardMarkup()
     button1 = InlineKeyboardButton("💔", callback_data=f"button1:{rec_item_id}")
     button2 = InlineKeyboardButton("❤", callback_data=f"button2:{rec_item_id}")
     keyboard.add(button1, button2)
 
-    await bot.send_message(user_id, "Пожалуйста, оцени качество рекомендации.", reply_markup=keyboard)
+    with open(img_url, 'rb') as photo:
+        photo = InputFile(photo)
+        await bot.send_photo(user_id, photo, caption=text_info, reply_markup=keyboard)
 
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('button'))

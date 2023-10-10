@@ -39,7 +39,7 @@ class DataManager:
         probs = [2] * n_fav + [1] * n_rest
         probs = probs / np.sum(probs)
 
-        sampled_items = np.random.choice(items_from_fav_categ + rest_items, size=k + 1, p=probs, replace=False)
+        sampled_items = np.random.choice(items_from_fav_categ + rest_items, size=k+1, p=probs, replace=False)
         used_items = self.interactions.loc[self.interactions['user_id'] == user_id, 'item_id'].values
 
         clean_sampled_items = []
