@@ -16,7 +16,6 @@ async def on_startup(_):
     await db.db_connect()
 
 
-
 class Profile(StatesGroup):
     name = State()
     gender = State()
