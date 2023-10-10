@@ -69,7 +69,7 @@ def load_users_data():
     df = pd.read_sql_query(
         "SELECT * FROM users",
         db,
-        dtype={'user_id': np.uint64, 'age': np.uint64, 'gender': str, 'time_added': datetime,
+        dtype={'user_id': np.uint64, 'age': np.uint64, 'gender': str, 'time_added': str,
                'kids_flag': str, 'pets_flag': str, 'feedback': np.uint64}
     )
     return df
@@ -83,7 +83,7 @@ def load_items_data():
     #            'first_time': np.uint64, 'text_info': str, 'days_left': np.uint64 ,'img_url': str
     # })
     df = pd.read_csv('items.csv', dtype={'item_id': np.uint64, 'category': str, 'brand': str,
-                                         'percent': np.uint64,'first_time': np.uint64, 'text_info': str,
+                                         'percent': np.uint64, 'first_time': np.uint64, 'text_info': str,
                                          'days_left': np.uint64 ,'img_url': str}).set_index('item_id')
     return df
 
@@ -92,5 +92,5 @@ def load_interactions_data():
     df = pd.read_sql_query(
         "SELECT * FROM interactions",
         db,
-        dtype={'user_id': np.uint64, 'item_id': np.uint64, 'feedback': np.uint64, 'timestamp': datetime})
+        dtype={'user_id': np.uint64, 'item_id': np.uint64, 'feedback': np.uint64, 'timestamp': str})
     return df
