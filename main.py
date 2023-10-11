@@ -54,9 +54,6 @@ async def show_recs(user_id):
         return
 
     img_url, category, text_info = data_manager.get_item_data(rec_item_id)
-    print(img_url)
-    with open(img_url, 'rb') as photo:
-        photo = InputFile(photo)
 
     keyboard = InlineKeyboardMarkup()
     button1 = InlineKeyboardButton("💔", callback_data=f"button1:{rec_item_id}")
