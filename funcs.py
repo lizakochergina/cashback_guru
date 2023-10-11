@@ -33,8 +33,8 @@ class DataManager:
             return model.predict(user_id, self.users, self.items, self.interactions, k)
         else:
             model = EASE()
-            model.fit(self.interactions)
-            return model.predict(user_id)
+            model.fit(self.interactions, self.items)
+            return model.predict(user_id, self.interactions)
 
     def get_item_data(self, item_id):
         row = self.items.loc[self.items['item_id'] == item_id]

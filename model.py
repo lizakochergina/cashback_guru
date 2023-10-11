@@ -47,23 +47,19 @@ class EASE:
         self.item_encoder = None
 
     def fit(
-            self, df: pd.DataFrame, item_col: str = "item_id",
-            user_col: str = "user_id", value_col: str = None
+            self, df, items, item_col='item_id', user_col="user_id"
     ) -> None:
         # user_ids = df[user_col].unique()
         # item_ids = df[item_col].unique()
 
-        self.user_encoder = LabelEncoder()
-        self.item_encoder = LabelEncoder()
-        user_ids = self.user_encoder.fit_transform(df[user_col])
-        item_ids = self.item_encoder.fit_transform(df[item_col])
+        self.user_encoder = LabelEncoder().fit(df[user_col].unique())
+        self.item_encoder = LabelEncoder().fit(items[item_col])
+        user_ids = self.user_encoder.transform(df[user_col])
+        item_ids = self.item_encoder.transform(df[item_col])
 
-        if value_col is None:
-            counts = np.ones(len(df))
-        else:
-            counts = df[value_col].values
+        counts = np.ones(len(df))
 
-        matrix_shape = len(user_ids), len(item_ids)
+        matrix_shape = len(user_ids), len(items)
 
         X = csr_matrix((counts, (user_ids, item_ids)), shape=matrix_shape)
 
@@ -84,7 +80,7 @@ class EASE:
         encoded_user_id = self.user_encoder.transform([user_id])[0]
         scores = self.interaction_matrix[encoded_user_id, :] @ self.item_similarity
         ids = np.argsort(-scores, axis=-1)
-        orig_item_ids = self.item_encoder.inverse_transform(np.array(ids))
+        orig_item_ids = self.item_encoder.inverse_transform(np.array(ids)[0])
 
         used_items = interactions.loc[interactions['user_id'] == user_id, 'item_id'].values
         filtered_items = np.setdiff1d(orig_item_ids, used_items, assume_unique=True)
