@@ -12,7 +12,7 @@ async def db_connect():
     # db = sql.connect('recsys.db')
     # cursor = db.cursor()
     query = "CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, age INTEGER, sex TEXT, categories TEXT," \
-            "timestamp TEXT, kids_flag INTEGER, pets_flag INTEGER, feedback INTEGER)"
+            "timestamp TEXT, kids_flag INTEGER, pets_flag INTEGER, feedback INTEGER, cur_page INTEGER)"
     query2 = "CREATE TABLE IF NOT EXISTS items(item_id INTEGER PRIMARY KEY, category TEXT, brand TEXT, " \
              "percent INTEGER, first_time INTEGER, text_info TEXT, days_left INTEGER, img_url TEXT)"
     query3 = "CREATE TABLE IF NOT EXISTS interactions(user_id INTEGER, item_id INTEGER, feedback TEXT, timestamp TEXT," \
@@ -39,7 +39,7 @@ async def create_profile(state, user_id):
         async with state.proxy() as data:
             cursor.execute(
                 "INSERT INTO users (user_id, age, sex, categories, timestamp, kids_flag, pets_flag,"
-                "feedback) VALUES(?, ?, ?,'', ?, ?, ?, 0)",
+                "feedback, cur_page) VALUES(?, ?, ?,'', ?, ?, ?, 0, 1)",
                 (user_id, data['age'], data["sex"], data["creation_time"], data["kids_flag"], data["pets_flag"]))
             db.commit()
     else:
@@ -71,7 +71,7 @@ def load_users_data():
         "SELECT * FROM users",
         db,
         dtype={'user_id': np.uint64, 'age': np.uint64, 'sex': str, 'timestamp': str, 'categories': str,
-               'kids_flag': np.uint64, 'pets_flag': np.uint64, 'feedback': np.uint64}
+               'kids_flag': np.uint64, 'pets_flag': np.uint64, 'feedback': np.uint64, 'cur_page': np.uint64}
     ).set_index("user_id")
     return df
 
@@ -97,7 +97,7 @@ def load_interactions_data():
     return df
 
 
-def write_feedback(user_id, item_id,  reaction, timestamp):
+def write_feedback(user_id, item_id, reaction, timestamp):
     cursor.execute(
         "UPDATE users SET feedback = '{}' WHERE user_id = '{}'".format(
             1, user_id))
@@ -105,3 +105,16 @@ def write_feedback(user_id, item_id,  reaction, timestamp):
         "INSERT INTO interactions (user_id, item_id, feedback, timestamp) VALUES(?, ?, ?, ?)",
         (user_id, item_id, reaction, timestamp))
     db.commit()
+
+
+async def save_current_page(user_id, page):
+    cursor.execute(
+        "UPDATE users SET cur_page = '{}' WHERE user_id = '{}'".format(
+            page, user_id))
+    db.commit()
+
+async def get_current_page(user_id):
+    cur_page = cursor.execute(
+        "SELECT cur_page FROM users WHERE user_id == '{key}'".format(
+            key=user_id)).fetchone()[0]
+    return cur_page
