@@ -42,9 +42,9 @@ class DataManager:
 
     def get_stats(self, user_id):
         user_interactions = self.interactions[self.interactions['user_id'] == user_id]
-        total = len(user_interactions)
-        liked = user_interactions['feedback'].sum()
-        disliked = total - liked
+        total = int(len(user_interactions))
+        liked = int(user_interactions['feedback'].sum())
+        disliked = int(total - liked)
         return total, liked, disliked
 
     def add_interaction(self, user_id, item_id, feedback, timestamp):
