@@ -50,7 +50,9 @@ class DataManager:
             if item not in used_items:
                 clean_sampled_items.append(item)
         print('clean', clean_sampled_items)
-        if k == 1:
+        if not clean_sampled_items:
+            return []
+        elif k == 1:
             return clean_sampled_items[0]
         else:
             return clean_sampled_items[:k]
