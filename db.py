@@ -12,7 +12,7 @@ async def db_connect():
     # db = sql.connect('recsys.db')
     # cursor = db.cursor()
     query = "CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, age INTEGER, sex TEXT, categories TEXT," \
-            "timestamp TEXT, kids_flag INTEGER, pets_flag INTEGER, feedback INTEGER)"
+            "timestamp TEXT, kids_flag INTEGER, pets_flag INTEGER, feedback INTEGER, cur_page INTEGER)"
     query2 = "CREATE TABLE IF NOT EXISTS items(item_id INTEGER, cashback TEXT,  condition TEXT, exp_date_txt TEXT, category TEXT, brand TEXT, first_time INTEGER, text_info TEXT, img_url TEXT)"
     query3 = "CREATE TABLE IF NOT EXISTS interactions(user_id INTEGER, item_id INTEGER, feedback TEXT, timestamp TEXT," \
              "PRIMARY KEY (user_id, item_id))"
@@ -70,7 +70,7 @@ def load_users_data():
         "SELECT * FROM users",
         db,
         dtype={'user_id': np.uint64, 'age': np.uint64, 'sex': str, 'timestamp': str, 'categories': str,
-               'kids_flag': np.uint64, 'pets_flag': np.uint64, 'feedback': np.uint64}
+               'kids_flag': np.uint64, 'pets_flag': np.uint64, 'feedback': np.uint64, 'cur_page': np.uint64}
     ).set_index("user_id")
     return df
 
