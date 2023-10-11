@@ -32,7 +32,7 @@ class StupidRecommender:
         filtered_items = np.setdiff1d(sampled_items, used_items, assume_unique=True)
 
         if k == 1:
-            return filtered_items[0]
+            return filtered_items[0] if len(filtered_items) else None
         else:
             return filtered_items[:k]
 
@@ -90,6 +90,6 @@ class EASE:
         filtered_items = np.setdiff1d(orig_item_ids, used_items, assume_unique=True)
 
         if k == 1:
-            return filtered_items[0]
+            return filtered_items[0] if len(filtered_items) else None
         else:
             return filtered_items[:k]
