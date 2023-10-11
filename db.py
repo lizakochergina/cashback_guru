@@ -13,8 +13,7 @@ async def db_connect():
     # cursor = db.cursor()
     query = "CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, age INTEGER, sex TEXT, categories TEXT," \
             "timestamp TEXT, kids_flag INTEGER, pets_flag INTEGER, feedback INTEGER)"
-    query2 = "CREATE TABLE IF NOT EXISTS items(item_id INTEGER PRIMARY KEY, category TEXT, brand TEXT, " \
-             "cashback TEXT, first_time INTEGER, text_info TEXT, exp_date_txt TEXT, img_url TEXT, condition TEXT)"
+    query2 = "CREATE TABLE IF NOT EXISTS items(item_id INTEGER, cashback TEXT,  condition TEXT, exp_date_txt TEXT, category TEXT, brand TEXT, first_time INTEGER, text_info TEXT, img_url TEXT)"
     query3 = "CREATE TABLE IF NOT EXISTS interactions(user_id INTEGER, item_id INTEGER, feedback TEXT, timestamp TEXT," \
              "PRIMARY KEY (user_id, item_id))"
     cursor.execute(query)
@@ -77,16 +76,16 @@ def load_users_data():
 
 
 def load_items_data():
-    # df = pd.read_sql_query(
-    #     "SELECT * FROM items",
-    #     db,
-    #     dtype={'item_id': np.uint64, 'category': str, 'brand': str,
-    #              'cashback': str, 'first_time': np.uint64, 'text_info': str,
-    #              'exp_date_txt': str, 'img_url': str, 'condition': str})
+    df = pd.read_sql_query(
+        "SELECT * FROM items",
+        db,
+        dtype={'item_id': np.uint64, 'category': str, 'brand': str,
+                 'cashback': str, 'first_time': np.uint64, 'text_info': str,
+                 'exp_date_txt': str, 'img_url': str, 'condition': str})
 
-    df = pd.read_csv('items.csv', dtype={'item_id': np.uint64, 'category': str, 'brand': str,
-                                         'cashback': str, 'first_time': np.uint64, 'text_info': str,
-                                         'exp_date_txt': str, 'img_url': str, 'condition': str})
+    # df = pd.read_csv('items.csv', dtype={'item_id': np.uint64, 'category': str, 'brand': str,
+    #                                      'cashback': str, 'first_time': np.uint64, 'text_info': str,
+    #                                      'exp_date_txt': str, 'img_url': str, 'condition': str})
     return df
 
 
