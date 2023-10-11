@@ -8,7 +8,7 @@ class DataManager:
         """
             need to load data from database
 
-            users = pd.DataFrame(cols={user_id, age, gender, preferences, time_added, kids_flag, pets_flag, feedback})
+            users = pd.DataFrame(cols={user_id, age, sex, categories, timestamp, kids_flag, pets_flag, feedback})
             items = pd.DataFrame(cols={item_id, category, brand, percent, first_time,
                                        text_info, days_left, img_url})
             interactions = pd.DataFrame(cols={user_id, item_id, feedback, timestamp})
@@ -24,7 +24,7 @@ class DataManager:
         self.n_items = len(self.items)
 
     def get_first_recs(self, user_id, k=1):
-        users_fav_categories = self.users.loc[user_id, 'preferences'].split(";")
+        users_fav_categories = self.users.loc[user_id, 'categories'].split(";")
         if self.users.loc[user_id, 'kids_flag'] == "Да":
             users_fav_categories.append('Товары для детей')
         if self.users.loc[user_id, 'pets_flag'] == "Да":
@@ -39,11 +39,8 @@ class DataManager:
         probs = [2] * n_fav + [1] * n_rest
         probs = probs / np.sum(probs)
 
-        sampled_items = np.random.choice(items_from_fav_categ + rest_items, size=k + 1, p=probs, replace=False)
+        sampled_items = np.random.choice(items_from_fav_categ + rest_items, size=k+1, p=probs, replace=False)
         used_items = self.interactions.loc[self.interactions['user_id'] == user_id, 'item_id'].values
-        print(probs)
-        print('sampled', sampled_items)
-        print('used', used_items)
 
         clean_sampled_items = []
         for item in sampled_items:
@@ -65,3 +62,22 @@ class DataManager:
     def add_interaction(self, user_id, item_id, feedback, timestamp):
         n = len(self.interactions)
         self.interactions.loc[n] = [user_id, item_id, feedback, timestamp]
+
+    def add_categories(self, user_id, categories):
+        categ = ';'.join(categories)
+        self.users.loc[user_id, 'categories'] = categ
+
+    def add_age(self, user_id, age):
+        self.users.loc[user_id, 'age'] = age
+
+    def add_sex(self, user_id, sex):
+        self.users.loc[user_id, 'sex'] = sex
+
+    def add_kids(self, user_id, kids):
+        self.users.loc[user_id, 'kids_flag'] = kids
+
+    def add_pets(self, user_id, pets):
+        self.users.loc[user_id, 'pets'] = pets
+
+    def add_time(self, user_id, timestamp):
+        self.users.loc[user_id, 'timestamp'] = timestamp

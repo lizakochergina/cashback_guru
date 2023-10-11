@@ -46,9 +46,7 @@ async def create_subjects_keyboard(user_id):
     return keyboard
 
 
-@dp.callback_query_handler(lambda c: c.data == 'show_recommendations')
-async def show_recommendations(callback_query: types.CallbackQuery):
-    user_id = callback_query.from_user.id
+async def show_recs(user_id):
     rec_item_id = data_manager.get_first_recs(user_id)
 
     if not rec_item_id:
@@ -59,14 +57,21 @@ async def show_recommendations(callback_query: types.CallbackQuery):
     print(img_url)
     with open(img_url, 'rb') as photo:
         photo = InputFile(photo)
-        await bot.send_photo(user_id, photo, caption=text_info)
 
     keyboard = InlineKeyboardMarkup()
     button1 = InlineKeyboardButton("💔", callback_data=f"button1:{rec_item_id}")
     button2 = InlineKeyboardButton("❤", callback_data=f"button2:{rec_item_id}")
     keyboard.add(button1, button2)
 
-    await bot.send_message(user_id, "Пожалуйста, оцени качество рекомендации.", reply_markup=keyboard)
+    with open(img_url, 'rb') as photo:
+        photo = InputFile(photo)
+        await bot.send_photo(user_id, photo, caption=text_info, reply_markup=keyboard)
+
+
+@dp.callback_query_handler(lambda c: c.data == 'show_recommendations')
+async def show_recs_from_callback(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+    await show_recs(user_id)
 
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('button'))
@@ -79,7 +84,7 @@ async def process_callback_button(callback_query: types.CallbackQuery):
     elif button_number[-1] == '2':
         db.write_feedback(user_id, int(item_id), 1, callback_query.message.date)
         data_manager.add_interaction(user_id, int(item_id), 1, callback_query.message.date)
-    await show_recommendations(callback_query)
+    await show_recs_from_callback(callback_query)
 
 
 @dp.message_handler(lambda message: message.text == "Выбрать любимые категории",
@@ -105,6 +110,7 @@ async def process_subject_callback(callback_query: types.CallbackQuery):
         await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id,
                                             reply_markup=keyboard)
     await db.write_categories(user_id, selected_subjects)
+    data_manager.add_categories(user_id, selected_subjects)
     new_keyboard = await create_subjects_keyboard(user_id)
     if new_keyboard.inline_keyboard != callback_query.message.reply_markup.inline_keyboard:
         await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id,
@@ -115,19 +121,23 @@ async def process_subject_callback(callback_query: types.CallbackQuery):
 async def process_start_command(message: types.Message):
     if await db.user_exists(message.from_user.id):
         # send recs
-        await bot.send_message(message.from_user.id, "Рад видеть тебя снова!")
+        await bot.send_message(message.from_user.id, "Рад видеть тебя снова! Лови новые кэшбеки 💸💸💸")
+        await show_recs(message.from_user.id)
+
     else:
         await bot.send_message(message.from_user.id, "Привет!\nДля начала мне нужно узнать кое-что о тебе.")
         await message.answer("Укажи свой возраст:\n")
         await Profile.age.set()
 
 
-# Заполнение возраста
+# fill age
 @dp.message_handler(state=Profile.age)
 async def get_age(message, state):
     if message.text.isdigit() and 1 <= int(message.text) <= 120:
+        user_id = message.from_user.id
         async with state.proxy() as data:
             data['age'] = int(message.text)
+            data_manager.add_age(user_id, int(message.text))
         female = KeyboardButton('Женщина')
         male = KeyboardButton('Мужчина')
         buttons = ReplyKeyboardMarkup(one_time_keyboard=True)
@@ -138,11 +148,13 @@ async def get_age(message, state):
         await message.answer('Пожалуйста, введи настоящий возраст')
 
 
-# Заполнение гендера
+# fill sex
 @dp.message_handler(state=Profile.gender)
 async def get_gender(message, state):
+    user_id = message.from_user.id
     async with state.proxy() as data:
-        data['gender'] = message.text
+        data['sex'] = message.text
+        data_manager.add_sex(user_id, message.text)
     buttons = ReplyKeyboardRemove()
     yes = KeyboardButton('Да')
     no = KeyboardButton('Нет')
@@ -152,11 +164,13 @@ async def get_gender(message, state):
     await Profile.next()
 
 
-# Заполнение индикатора животных
+# fill pets flag
 @dp.message_handler(state=Profile.pets_flag)
 async def get_pets(message, state):
+    user_id = message.from_user.id
     async with state.proxy() as data:
         data['pets_flag'] = message.text
+        data_manager.add_kids(user_id, message.text)
     yes = KeyboardButton('Да')
     no = KeyboardButton('Нет')
     buttons = ReplyKeyboardMarkup(one_time_keyboard=True)
@@ -165,12 +179,15 @@ async def get_pets(message, state):
     await Profile.next()
 
 
-# Заполнение детей
+# fill kids flag
 @dp.message_handler(state=Profile.kids_flag)
 async def get_kids(message, state):
+    user_id = message.from_user.id
     async with state.proxy() as data:
         data['kids_flag'] = message.text
         data['creation_time'] = message.date
+        data_manager.add_pets(user_id, message.text)
+        data_manager.add_time(user_id, message.date)
     await db.create_profile(state, user_id=message.from_user.id)
     fill_categories = KeyboardButton("Выбрать любимые категории")
     buttons = ReplyKeyboardMarkup(one_time_keyboard=True)
