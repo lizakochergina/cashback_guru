@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from db import load_users_data, load_items_data, load_interactions_data
+from model import EASE
 
 
 class DataManager:
@@ -22,12 +23,21 @@ class DataManager:
         self.interactions.to_csv('interactions.csv', index=False)
 
         self.n_items = len(self.items)
+        self.n_ml_mode = 7
+
+    def get_recs(self, user_id, k=1):
+        if len(self.users) < self.n_ml_mode:
+            return self.get_first_recs(user_id, k)
+        else:
+            model = EASE()
+            model.fit(self.interactions)
+            return model.predict(user_id)
 
     def get_first_recs(self, user_id, k=1):
         users_fav_categories = self.users.loc[user_id, 'categories'].split(";")
-        if self.users.loc[user_id, 'kids_flag'] == "Да":
+        if self.users.loc[user_id, 'kids_flag'] == 1:
             users_fav_categories.append('Товары для детей')
-        if self.users.loc[user_id, 'pets_flag'] == "Да":
+        if self.users.loc[user_id, 'pets_flag'] == 1:
             users_fav_categories.append('Товары для животных')
 
         items_from_fav_categ = self.items.loc[
@@ -53,7 +63,6 @@ class DataManager:
 
     def get_item_data(self, item_id):
         row = self.items.loc[self.items['item_id'] == item_id]
-        print(row)
         return row['img_url'].values[0], row['category'].values[0], row['text_info'].values[0]
 
     def add_interaction(self, user_id, item_id, feedback, timestamp):

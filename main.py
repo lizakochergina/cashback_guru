@@ -47,7 +47,7 @@ async def create_subjects_keyboard(user_id):
 
 
 async def show_recs(user_id):
-    rec_item_id = data_manager.get_first_recs(user_id)
+    rec_item_id = data_manager.get_recs(user_id)
 
     img_url, category, text_info = data_manager.get_item_data(rec_item_id)
 
@@ -116,7 +116,6 @@ async def process_start_command(message: types.Message):
         # send recs
         await bot.send_message(message.from_user.id, "Рад видеть тебя снова! Лови новые кэшбеки 💸💸💸")
         await show_recs(message.from_user.id)
-
     else:
         await bot.send_message(message.from_user.id, "Привет!\nДля начала мне нужно узнать кое-что о тебе.")
         await message.answer("Укажи свой возраст:\n")
@@ -162,7 +161,7 @@ async def get_gender(message, state):
 async def get_pets(message, state):
     user_id = message.from_user.id
     async with state.proxy() as data:
-        data['pets_flag'] = message.text
+        data['pets_flag'] = 1 if message.text == 'Да' else 0
         data_manager.add_kids(user_id, message.text)
     yes = KeyboardButton('Да')
     no = KeyboardButton('Нет')
@@ -177,7 +176,7 @@ async def get_pets(message, state):
 async def get_kids(message, state):
     user_id = message.from_user.id
     async with state.proxy() as data:
-        data['kids_flag'] = message.text
+        data['kids_flag'] = 1 if message.text == 'Да' else 0
         data['creation_time'] = message.date
         data_manager.add_pets(user_id, message.text)
         data_manager.add_time(user_id, message.date)
