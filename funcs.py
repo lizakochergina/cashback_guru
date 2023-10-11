@@ -26,7 +26,9 @@ class DataManager:
         self.n_ml_mode = 7
 
     def get_recs(self, user_id, k=1):
-        if len(self.users) < self.n_ml_mode:
+        # for new users use stupid recommender
+        n_user_interactions = len(self.interactions[self.interactions['user_id'] == user_id])
+        if len(self.users) < self.n_ml_mode or n_user_interactions < 3:
             model = StupidRecommender()
             return model.predict(user_id, self.users, self.items, self.interactions, k)
         else:
