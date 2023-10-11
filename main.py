@@ -10,13 +10,17 @@ from funcs import DataManager
 TOKEN = '6436284246:AAEb8aEUhFvIegTMMa77mJ2gxYCQJDiuujc'
 
 bot = Bot(token=TOKEN)
+print('created bot')
 dp = Dispatcher(bot, storage=MemoryStorage())
+print('created dp')
 
 
 async def on_startup(_):
     await db.db_connect()
+print('dp connect')
 
 data_manager = DataManager()
+print('created data manager')
 
 
 class Profile(StatesGroup):
