@@ -49,7 +49,14 @@ async def create_subjects_keyboard(user_id):
 async def show_recs(user_id):
     rec_item_id = data_manager.get_recs(user_id)
 
+    if not rec_item_id:
+        await bot.send_message(user_id, "Пока что на этом все!")
+        return
+
     img_url, category, text_info = data_manager.get_item_data(rec_item_id)
+    print(img_url)
+    with open(img_url, 'rb') as photo:
+        photo = InputFile(photo)
 
     keyboard = InlineKeyboardMarkup()
     button1 = InlineKeyboardButton("💔", callback_data=f"button1:{rec_item_id}")
