@@ -230,5 +230,13 @@ async def process_help_command(message: types.Message):
     await message.reply("Описание бота и команд")
 
 
+@dp.message_handler(commands=['stats'])
+async def process_help_command(message: types.Message):
+    user_id = message.from_user.id
+    total, liked, disliked = data_manager.get_stats(user_id)
+    msg = "ты просмотрел(а) {} кэшбеков\n❤ {}\n💔 {}".format(total, liked, disliked)
+    await bot.send_message(user_id, msg)
+
+
 if __name__ == '__main__':
     executor.start_polling(dp, on_startup=on_startup, skip_updates=True)

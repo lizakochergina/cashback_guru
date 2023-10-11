@@ -40,6 +40,13 @@ class DataManager:
         row = self.items.loc[self.items['item_id'] == item_id]
         return row['img_url'].values[0], row['category'].values[0], row['text_info'].values[0]
 
+    def get_stats(self, user_id):
+        user_interactions = self.interactions[self.interactions['user_id'] == user_id]
+        total = len(user_interactions)
+        liked = user_interactions['feedback'].sum()
+        disliked = total - liked
+        return total, liked, disliked
+
     def add_interaction(self, user_id, item_id, feedback, timestamp):
         n = len(self.interactions)
         cond = (self.interactions['user_id'] == user_id) & (self.interactions['item_id'] == item_id)
