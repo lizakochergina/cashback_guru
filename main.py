@@ -81,6 +81,7 @@ async def process_callback_button(callback_query: types.CallbackQuery):
     elif button_number[-1] == '2':
         db.write_feedback(user_id, int(item_id), 1, callback_query.message.date)
         data_manager.add_interaction(user_id, int(item_id), 1, callback_query.message.date)
+    await bot.edit_message_reply_markup(chat_id=callback_query.message.chat.id, message_id=callback_query.message.message_id)
     await show_recs_from_callback(callback_query)
 
 
