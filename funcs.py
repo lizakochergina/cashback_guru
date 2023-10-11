@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from db import load_users_data, load_items_data, load_interactions_data
-from model import EASE
+from model import EASE, StupidRecommender
 
 
 class DataManager:
@@ -27,39 +27,12 @@ class DataManager:
 
     def get_recs(self, user_id, k=1):
         if len(self.users) < self.n_ml_mode:
-            return self.get_first_recs(user_id, k)
+            model = StupidRecommender()
+            return model.predict(user_id, self.users, self.items, self.interactions, k)
         else:
             model = EASE()
             model.fit(self.interactions)
             return model.predict(user_id)
-
-    def get_first_recs(self, user_id, k=1):
-        users_fav_categories = self.users.loc[user_id, 'categories'].split(";")
-        if self.users.loc[user_id, 'kids_flag'] == 1:
-            users_fav_categories.append('Товары для детей')
-        if self.users.loc[user_id, 'pets_flag'] == 1:
-            users_fav_categories.append('Товары для животных')
-
-        items_from_fav_categ = self.items.loc[
-            self.items['category'].isin(users_fav_categories), 'item_id'].values.tolist()
-        rest_items = self.items.loc[~self.items['category'].isin(users_fav_categories), 'item_id'].values.tolist()
-        n_fav = len(items_from_fav_categ)
-        n_rest = self.n_items - n_fav
-
-        probs = [2] * n_fav + [1] * n_rest
-        probs = probs / np.sum(probs)
-
-        sampled_items = np.random.choice(items_from_fav_categ + rest_items, size=k+1, p=probs, replace=False)
-        used_items = self.interactions.loc[self.interactions['user_id'] == user_id, 'item_id'].values
-
-        clean_sampled_items = []
-        for item in sampled_items:
-            if item not in used_items:
-                clean_sampled_items.append(item)
-        if k == 1:
-            return clean_sampled_items[0]
-        else:
-            return clean_sampled_items[:k]
 
     def get_item_data(self, item_id):
         row = self.items.loc[self.items['item_id'] == item_id]
