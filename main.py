@@ -80,14 +80,6 @@ async def process_page_callback(callback_query: types.CallbackQuery):
                                         reply_markup=keyboard)
 
 
-@dp.message_handler(lambda message: message.text == "Выбрать любимые категории", state="*")
-async def process_start_command(message: types.Message):
-    user_id = message.from_user.id
-    keyboard_page1 = await create_subjects_keyboard(user_id, page=1)
-    await message.answer(text="Выбери свои любимые категории:", reply_markup=keyboard_page1)
-    await db.save_current_page(user_id, page=1)
-
-
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('subject:'))
 async def process_subject_callback(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
@@ -224,12 +216,12 @@ async def get_kids(message, state):
     await db.create_profile(state, user_id=message.from_user.id)
     await state.finish()
 
-    msg = 'Осталось узнать твои предпочтения.'
+    msg = 'Еще чуть-чуть и мы начинаем показывать тебе супер выгодные предложения.'
     await bot.send_message(user_id, msg, reply_markup=ReplyKeyboardRemove())
 
     msg = 'Выбери несколько категорий, на основе которых мы построим тебе первые рекоммендации.'
     keyboard_page1 = await create_subjects_keyboard(user_id, page=1)
-    await message.answer(text='Категории:', reply_markup=keyboard_page1)
+    await message.answer(text=msg, reply_markup=keyboard_page1)
     await db.save_current_page(user_id, page=1)
 
 
