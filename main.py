@@ -96,10 +96,7 @@ async def process_subject_callback(callback_query: types.CallbackQuery):
     elif action == "done":
         await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
         await show_recs(user_id)
-        # keyboard = InlineKeyboardMarkup()
-        # keyboard.add(InlineKeyboardButton(text="Показать рекомендации", callback_data="show_recommendations"))
-        # await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id, reply_markup=keyboard)
-
+        
     await db.write_categories(user_id, selected_subjects)
     data_manager.add_categories(user_id, selected_subjects)
     current_page = await db.get_current_page(user_id)
