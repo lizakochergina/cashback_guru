@@ -183,50 +183,61 @@ async def get_age(message, state):
 # fill sex
 @dp.message_handler(state=Profile.gender)
 async def get_gender(message, state):
-    user_id = message.from_user.id
-    async with state.proxy() as data:
-        data['sex'] = message.text
-        data_manager.add_sex(user_id, message.text)
-    buttons = ReplyKeyboardRemove()
-    yes = KeyboardButton('Да')
-    no = KeyboardButton('Нет')
-    buttons = ReplyKeyboardMarkup(one_time_keyboard=True)
-    buttons.add(yes, no)
-    await message.answer('Есть ли у тебя домашние животные?', reply_markup=buttons)
-    await Profile.next()
+    if message.text.isalpha() and (message.text == "Женщина" or message.text == "Мужчина"):
+        user_id = message.from_user.id
+        async with state.proxy() as data:
+            data['sex'] = message.text
+            data_manager.add_sex(user_id, message.text)
+        buttons = ReplyKeyboardRemove()
+        yes = KeyboardButton('Да')
+        no = KeyboardButton('Нет')
+        buttons = ReplyKeyboardMarkup(one_time_keyboard=True)
+        buttons.add(yes, no)
+        await message.answer('Есть ли у тебя домашние животные?', reply_markup=buttons)
+        await Profile.next()
+    else:
+        await message.answer("Пожалуйста, нажми на одну из кнопок")
 
 
 # fill pets flag
 @dp.message_handler(state=Profile.pets_flag)
 async def get_pets(message, state):
-    user_id = message.from_user.id
-    async with state.proxy() as data:
-        data['pets_flag'] = 1 if message.text == 'Да' else 0
-        data_manager.add_kids(user_id, message.text)
-    yes = KeyboardButton('Да')
-    no = KeyboardButton('Нет')
-    buttons = ReplyKeyboardMarkup(one_time_keyboard=True)
-    buttons.add(yes, no)
-    await message.answer('Есть ли у тебя дети?', reply_markup=buttons)
-    await Profile.next()
+    if message.text.isalpha() and (message.text == "Да" or message.text == "Нет"):
+        user_id = message.from_user.id
+        async with state.proxy() as data:
+            data['pets_flag'] = 1 if message.text == 'Да' else 0
+            data_manager.add_kids(user_id, message.text)
+        yes = KeyboardButton('Да')
+        no = KeyboardButton('Нет')
+        buttons = ReplyKeyboardMarkup(one_time_keyboard=True)
+        buttons.add(yes, no)
+        await message.answer('Есть ли у тебя дети?', reply_markup=buttons)
+        await Profile.next()
+    else:
+        await message.answer("Пожалуйста, нажми на одну из кнопок")
+
+        # fill kids flag
 
 
-# fill kids flag
 @dp.message_handler(state=Profile.kids_flag)
 async def get_kids(message, state):
-    user_id = message.from_user.id
-    async with state.proxy() as data:
-        data['kids_flag'] = 1 if message.text == 'Да' else 0
-        data['creation_time'] = message.date
-        data_manager.add_pets(user_id, message.text)
-        data_manager.add_time(user_id, message.date)
-    await db.create_profile(state, user_id=message.from_user.id)
-    # fill_categories = KeyboardButton("Выбрать любимые категории")
-    # buttons = ReplyKeyboardMarkup(one_time_keyboard=True)
-    # buttons.add(fill_categories)
-    msg = 'Осталось узнать твои предпочтения. Выбери несколько категорий, на основе которых мы построим тебе первые рекоммендации.'
-    # await message.answer(msg, reply_markup=buttons)
-    await state.finish()
+    if message.text.isalpha() and (message.text == "Да" or message.text == "Нет"):
+        user_id = message.from_user.id
+        async with state.proxy() as data:
+            data['kids_flag'] = 1 if message.text == 'Да' else 0
+            data['creation_time'] = message.date
+            data_manager.add_pets(user_id, message.text)
+            data_manager.add_time(user_id, message.date)
+        await db.create_profile(state, user_id=message.from_user.id)
+        # fill_categories = KeyboardButton("Выбрать любимые категории")
+        # buttons = ReplyKeyboardMarkup(one_time_keyboard=True)
+        # buttons.add(fill_categories)
+
+        msg = 'Осталось узнать твои предпочтения. Выбери несколько категорий, на основе которых мы построим тебе первые рекоммендации.'
+        # await message.answer(msg, reply_markup=buttons)
+        await state.finish()
+    else:
+        await message.answer("Пожалуйста, нажми на одну из кнопок")
 
     user_id = message.from_user.id
     keyboard_page1 = await create_subjects_keyboard(user_id, page=1)
