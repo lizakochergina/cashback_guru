@@ -61,7 +61,6 @@ async def create_subjects_keyboard(user_id, page):
     else:
         keyboard.row(InlineKeyboardButton('⬅️ Назад', callback_data=f'page:{next_page}'), InlineKeyboardButton(text="Готово 🏁", callback_data=f'subject:{""}:done'))
 
-  #  keyboard.row(InlineKeyboardButton(text="Готово", callback_data=f'subject:{""}:done'))
     return keyboard
 
 
@@ -95,10 +94,12 @@ async def process_subject_callback(callback_query: types.CallbackQuery):
     elif action == 'unselect':
         selected_subjects.remove(subject)
     elif action == "done":
-        keyboard = InlineKeyboardMarkup()
-        keyboard.add(InlineKeyboardButton(text="Показать рекомендации", callback_data="show_recommendations"))
-        await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id,
-                                            reply_markup=keyboard)
+        await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+        await show_recs(user_id)
+        # keyboard = InlineKeyboardMarkup()
+        # keyboard.add(InlineKeyboardButton(text="Показать рекомендации", callback_data="show_recommendations"))
+        # await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id, reply_markup=keyboard)
+
     await db.write_categories(user_id, selected_subjects)
     data_manager.add_categories(user_id, selected_subjects)
     current_page = await db.get_current_page(user_id)
