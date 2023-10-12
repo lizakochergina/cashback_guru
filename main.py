@@ -206,6 +206,7 @@ async def get_pets(message, state):
     yes = KeyboardButton('Да')
     no = KeyboardButton('Нет')
     buttons = ReplyKeyboardMarkup(one_time_keyboard=True)
+    # buttons = ReplyKeyboardRemove()
     buttons.add(yes, no)
     await message.answer('Есть ли у тебя дети?', reply_markup=buttons)
     await Profile.next()
@@ -222,11 +223,13 @@ async def get_kids(message, state):
         data_manager.add_time(user_id, message.date)
     await db.create_profile(state, user_id=message.from_user.id)
     await state.finish()
-    
-    msg = 'Осталось узнать твои предпочтения. Выбери несколько категорий, на основе которых мы построим тебе первые рекоммендации.'
-    user_id = message.from_user.id
+
+    msg = 'Осталось узнать твои предпочтения.'
+    await bot.send_message(user_id, msg, reply_markup=ReplyKeyboardRemove())
+
+    msg = 'Выбери несколько категорий, на основе которых мы построим тебе первые рекоммендации.'
     keyboard_page1 = await create_subjects_keyboard(user_id, page=1)
-    await message.answer(text=msg, reply_markup=keyboard_page1)
+    await message.answer(text='Категории:', reply_markup=keyboard_page1)
     await db.save_current_page(user_id, page=1)
 
 
