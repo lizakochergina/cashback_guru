@@ -27,7 +27,7 @@ class StupidRecommender:
         probs = [2] * n_fav + [1] * n_rest
         probs = probs / np.sum(probs)
 
-        sampled_items = np.random.choice(items_from_fav_categ + rest_items, size=k+1, p=probs, replace=False)
+        sampled_items = np.random.choice(items_from_fav_categ + rest_items, size=10, p=probs, replace=False)
         used_items = interactions.loc[interactions['user_id'] == user_id, 'item_id'].values
         filtered_items = np.setdiff1d(sampled_items, used_items, assume_unique=True)
 
