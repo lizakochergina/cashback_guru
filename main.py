@@ -144,8 +144,8 @@ async def process_callback_button(callback_query: types.CallbackQuery):
     data_manager.mark_last_seen(user_id)
     await db.mark_last_rec(user_id)
     if button_number[-1] == '1':
-        db.write_feedback(user_id, int(item_id), 0, callback_query.message.date)
-        data_manager.add_interaction(user_id, int(item_id), 0, callback_query.message.date)
+        db.write_feedback(user_id, int(item_id), -1, callback_query.message.date)
+        data_manager.add_interaction(user_id, int(item_id), -1, callback_query.message.date)
     elif button_number[-1] == '2':
         db.write_feedback(user_id, int(item_id), 1, callback_query.message.date)
         data_manager.add_interaction(user_id, int(item_id), 1, callback_query.message.date)
@@ -156,11 +156,15 @@ async def process_callback_button(callback_query: types.CallbackQuery):
 
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
-    if await db.user_exists(message.from_user.id):
+    user_id = message.from_user.id
+    if await db.user_exists(user_id):
         # send recs
-        last_msg_id = await db.get_last_msg_id(message.from_user.id)
-        await bot.delete_message(chat_id=message.chat.id,
-                                            message_id=last_msg_id[0])
+        last_msg_id = await db.get_last_msg_id(user_id)
+        last_msg_id = last_msg_id[0]
+        if last_msg_id != -1:
+            await bot.delete_message(chat_id=message.chat.id, message_id=last_msg_id)
+            await db.write_msg_id(user_id, -1)
+            data_manager.write_last_seen_msg_id(user_id, -1)
         await bot.send_message(message.from_user.id, "Рад видеть тебя снова! Лови новые кэшбеки 💸💸💸")
         await show_recs(message.from_user.id)
     else:

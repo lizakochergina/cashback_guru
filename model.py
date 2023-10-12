@@ -46,21 +46,27 @@ class EASE:
         self.user_encoder = None
         self.item_encoder = None
         self.window = window
+        self.n_items = 117
+        self.item_encoder = LabelEncoder().fit(np.arange(self.n_items))
 
     def fit(
-            self, df, items, item_col='item_id', user_col="user_id"
+            self, df, items, item_col='item_id', user_col="user_id", value_col='feedback'
     ) -> None:
         # user_ids = df[user_col].unique()
         # item_ids = df[item_col].unique()
 
         self.user_encoder = LabelEncoder().fit(df[user_col].unique())
-        self.item_encoder = LabelEncoder().fit(items[item_col])
-        user_ids = self.user_encoder.transform(df[user_col])
-        item_ids = self.item_encoder.transform(df[item_col])
+        # self.item_encoder = LabelEncoder().fit(items[item_col])
 
-        counts = np.ones(len(df))
+        uniq_ids = df[[user_col, item_col]].drop_duplicates(keep='last').index
+        user_ids = self.user_encoder.transform(df.loc[uniq_ids, user_col])
+        item_ids = self.item_encoder.transform(df.loc[uniq_ids, item_col])
 
-        matrix_shape = len(user_ids), len(items)
+        counts = np.ones(len(uniq_ids))
+        # counts = df.loc[uniq_ids, value_col].values
+
+        n_users = df[user_col].nunique()
+        matrix_shape = n_users, self.n_items
 
         X = csr_matrix((counts, (user_ids, item_ids)), shape=matrix_shape)
 
