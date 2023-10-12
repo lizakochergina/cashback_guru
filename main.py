@@ -221,13 +221,9 @@ async def get_kids(message, state):
         data_manager.add_pets(user_id, message.text)
         data_manager.add_time(user_id, message.date)
     await db.create_profile(state, user_id=message.from_user.id)
-    # fill_categories = KeyboardButton("Выбрать любимые категории")
-    # buttons = ReplyKeyboardMarkup(one_time_keyboard=True)
-    # buttons.add(fill_categories)
-    msg = 'Осталось узнать твои предпочтения. Выбери несколько категорий, на основе которых мы построим тебе первые рекоммендации.'
-    # await message.answer(msg, reply_markup=buttons)
     await state.finish()
-
+    
+    msg = 'Осталось узнать твои предпочтения. Выбери несколько категорий, на основе которых мы построим тебе первые рекоммендации.'
     user_id = message.from_user.id
     keyboard_page1 = await create_subjects_keyboard(user_id, page=1)
     await message.answer(text=msg, reply_markup=keyboard_page1)
