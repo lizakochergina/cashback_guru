@@ -113,6 +113,7 @@ async def save_current_page(user_id, page):
             page, user_id))
     db.commit()
 
+
 async def get_current_page(user_id):
     cur_page = cursor.execute(
         "SELECT cur_page FROM users WHERE user_id == '{key}'".format(

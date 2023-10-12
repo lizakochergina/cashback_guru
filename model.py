@@ -38,13 +38,14 @@ class StupidRecommender:
 
 
 class EASE:
-    def __init__(self, reg: float = 0.01) -> None:
+    def __init__(self, reg: float = 0.01, window=30) -> None:
         self.reg = reg
         self.trained = False
         self.item_similarity = None
         self.interaction_matrix = None
         self.user_encoder = None
         self.item_encoder = None
+        self.window = window
 
     def fit(
             self, df, items, item_col='item_id', user_col="user_id"
@@ -82,7 +83,7 @@ class EASE:
         ids = np.argsort(-scores, axis=-1)
         orig_item_ids = self.item_encoder.inverse_transform(np.array(ids)[0])
 
-        used_items = interactions.loc[interactions['user_id'] == user_id, 'item_id'].values
+        used_items = interactions.loc[interactions['user_id'] == user_id, 'item_id'].drop_duplicates(keep='last')
         filtered_items = np.setdiff1d(orig_item_ids, used_items, assume_unique=True)
 
         if k == 1:

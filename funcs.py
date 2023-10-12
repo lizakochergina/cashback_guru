@@ -49,9 +49,7 @@ class DataManager:
 
     def add_interaction(self, user_id, item_id, feedback, timestamp):
         n = len(self.interactions)
-        cond = (self.interactions['user_id'] == user_id) & (self.interactions['item_id'] == item_id)
-        if len(self.interactions.loc[cond]) == 0:
-            self.interactions.loc[n] = [user_id, item_id, feedback, timestamp]
+        self.interactions.loc[n] = [user_id, item_id, feedback, timestamp]
 
     def add_categories(self, user_id, categories):
         categ = ';'.join(categories)
