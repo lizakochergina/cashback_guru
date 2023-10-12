@@ -38,7 +38,7 @@ async def create_profile(state, user_id):
         async with state.proxy() as data:
             cursor.execute(
                 "INSERT INTO users (user_id, age, sex, categories, timestamp, kids_flag, pets_flag,"
-                "feedback, cur_page, last_rec_id, last_rec_seen) VALUES(?, ?, ?,'', ?, ?, ?, 0, 1, 0,0)",
+                "feedback, cur_page, last_rec_id, last_rec_seen, last_msg_id) VALUES(?, ?, ?,'', ?, ?, ?, 0, 1, 0,0, 0)",
                 (user_id, data['age'], data["sex"], data["creation_time"], data["kids_flag"], data["pets_flag"]))
             db.commit()
     else:
@@ -129,8 +129,16 @@ async def get_interactions(user_id):
 
 
 async def write_rec_id(user_id, item_id):
-    cursor.execute("UPDATE users SET last_rec_id = '{}', last_rec_seen = '{}' WHERE user_id = '{}'".format(
-        item_id, 0, user_id))
+    cursor.execute(
+        "UPDATE users SET last_rec_id = '{}', last_rec_seen = '{}' WHERE user_id = '{}'".format(
+            item_id, 0, user_id))
+    db.commit()
+
+
+async def write_msg_id(user_id, msg_id):
+    cursor.execute(
+        "UPDATE users SET last_msg_id = '{}' WHERE user_id = '{}'".format(
+            msg_id, user_id))
     db.commit()
 
 
@@ -143,5 +151,12 @@ async def mark_last_rec(user_id):
 async def check_last_seen_rec(user_id):
     last_seen_info = cursor.execute(
         "SELECT last_rec_id, last_rec_seen FROM users WHERE user_id == '{key}'".format(
+            key=user_id)).fetchone()
+    return last_seen_info
+
+
+async def get_last_msg_id(user_id):
+    last_seen_info = cursor.execute(
+        "SELECT last_msg_id FROM users WHERE user_id == '{key}'".format(
             key=user_id)).fetchone()
     return last_seen_info

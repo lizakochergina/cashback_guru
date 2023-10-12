@@ -123,7 +123,8 @@ async def show_recs(user_id):
 
     with open(img_url, 'rb') as photo:
         photo = InputFile(photo)
-        await bot.send_photo(user_id, photo, caption=text_info, reply_markup=keyboard)
+        message = await bot.send_photo(user_id, photo, caption=text_info, reply_markup=keyboard)
+        await db.write_msg_id(user_id, message.message_id)
 
 
 @dp.callback_query_handler(lambda c: c.data == 'show_recommendations')
@@ -152,6 +153,9 @@ async def process_callback_button(callback_query: types.CallbackQuery):
 async def process_start_command(message: types.Message):
     if await db.user_exists(message.from_user.id):
         # send recs
+        last_msg_id = await db.get_last_msg_id(message.from_user.id)
+        await bot.delete_message(chat_id=message.chat.id,
+                                            message_id=last_msg_id[0])
         await bot.send_message(message.from_user.id, "Рад видеть тебя снова! Лови новые кэшбеки 💸💸💸")
         await show_recs(message.from_user.id)
     else:
