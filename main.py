@@ -17,6 +17,8 @@ print('created dp')
 
 async def on_startup(_):
     await db.db_connect()
+
+
 print('dp connect')
 
 data_manager = DataManager()
@@ -57,9 +59,11 @@ async def create_subjects_keyboard(user_id, page):
             keyboard.add(InlineKeyboardButton(f'❌ {category}', callback_data=f'subject:{category}:select'))
 
     if page == 1:
-        keyboard.row(InlineKeyboardButton('Вперед ➡️', callback_data=f'page:{next_page}'), InlineKeyboardButton(text="Готово 🏁", callback_data=f'subject:{""}:done'))
+        keyboard.row(InlineKeyboardButton('Вперед ➡️', callback_data=f'page:{next_page}'),
+                     InlineKeyboardButton(text="Готово 🏁", callback_data=f'subject:{""}:done'))
     else:
-        keyboard.row(InlineKeyboardButton('⬅️ Назад', callback_data=f'page:{next_page}'), InlineKeyboardButton(text="Готово 🏁", callback_data=f'subject:{""}:done'))
+        keyboard.row(InlineKeyboardButton('⬅️ Назад', callback_data=f'page:{next_page}'),
+                     InlineKeyboardButton(text="Готово 🏁", callback_data=f'subject:{""}:done'))
 
     return keyboard
 
@@ -96,7 +100,7 @@ async def process_subject_callback(callback_query: types.CallbackQuery):
     elif action == "done":
         await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
         await show_recs(user_id)
-        
+
     await db.write_categories(user_id, selected_subjects)
     data_manager.add_categories(user_id, selected_subjects)
     current_page = await db.get_current_page(user_id)
@@ -141,7 +145,8 @@ async def process_callback_button(callback_query: types.CallbackQuery):
     elif button_number[-1] == '2':
         db.write_feedback(user_id, int(item_id), 1, callback_query.message.date)
         data_manager.add_interaction(user_id, int(item_id), 1, callback_query.message.date)
-    await bot.edit_message_reply_markup(chat_id=callback_query.message.chat.id, message_id=callback_query.message.message_id)
+    await bot.edit_message_reply_markup(chat_id=callback_query.message.chat.id,
+                                        message_id=callback_query.message.message_id)
     await show_recs_from_callback(callback_query)
 
 
@@ -216,11 +221,17 @@ async def get_kids(message, state):
         data_manager.add_pets(user_id, message.text)
         data_manager.add_time(user_id, message.date)
     await db.create_profile(state, user_id=message.from_user.id)
-    fill_categories = KeyboardButton("Выбрать любимые категории")
-    buttons = ReplyKeyboardMarkup(one_time_keyboard=True)
-    buttons.add(fill_categories)
-    await message.answer('Здорово! Осталось узнать твои предпочтения:', reply_markup=buttons)
+    # fill_categories = KeyboardButton("Выбрать любимые категории")
+    # buttons = ReplyKeyboardMarkup(one_time_keyboard=True)
+    # buttons.add(fill_categories)
+    msg = 'Осталось узнать твои предпочтения. Выбери несколько категорий, на основе которых мы построим тебе первые рекоммендации.'
+    # await message.answer(msg, reply_markup=buttons)
     await state.finish()
+
+    user_id = message.from_user.id
+    keyboard_page1 = await create_subjects_keyboard(user_id, page=1)
+    await message.answer(text=msg, reply_markup=keyboard_page1)
+    await db.save_current_page(user_id, page=1)
 
 
 @dp.message_handler(commands=['help'])
