@@ -194,7 +194,6 @@ async def get_gender(message, state):
 # fill pets flag
 @dp.message_handler(state=Profile.pets_flag)
 async def get_pets(message, state):
-<<<<<<< HEAD
     if message.text.isalpha() and (message.text == "Да" or message.text == "Нет"):
         user_id = message.from_user.id
         async with state.proxy() as data:
@@ -209,10 +208,10 @@ async def get_pets(message, state):
     else:
         await message.answer("Пожалуйста, нажми на одну из кнопок")
 
+
 # fill kids flag
 @dp.message_handler(state=Profile.kids_flag)
 async def get_kids(message, state):
-<<<<<<< HEAD
     if message.text.isalpha() and (message.text == "Да" or message.text == "Нет"):
         user_id = message.from_user.id
         async with state.proxy() as data:
