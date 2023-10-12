@@ -8,11 +8,8 @@ cursor = db.cursor()
 
 
 async def db_connect():
-    # global db, cursor
-    # db = sql.connect('recsys.db')
-    # cursor = db.cursor()
     query = "CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, age INTEGER, sex TEXT, categories TEXT," \
-            "timestamp TEXT, kids_flag INTEGER, pets_flag INTEGER, feedback INTEGER, cur_page INTEGER)"
+            "timestamp TEXT, kids_flag INTEGER, pets_flag INTEGER, feedback INTEGER, cur_page INTEGER, last_rec_id INTEGER, last_rec_seen INTEGER, last_msg_id INTEGER)"
     query2 = "CREATE TABLE IF NOT EXISTS items(item_id INTEGER, cashback TEXT, condition TEXT, exp_date_txt TEXT, category TEXT, brand TEXT, first_time INTEGER, text_info TEXT, img_url TEXT)"
     query3 = "CREATE TABLE IF NOT EXISTS interactions(user_id INTEGER, item_id INTEGER, feedback TEXT, timestamp TEXT," \
              "PRIMARY KEY (user_id, item_id, timestamp))"
@@ -38,7 +35,7 @@ async def create_profile(state, user_id):
         async with state.proxy() as data:
             cursor.execute(
                 "INSERT INTO users (user_id, age, sex, categories, timestamp, kids_flag, pets_flag,"
-                "feedback, cur_page, last_rec_id, last_rec_seen, last_msg_id) VALUES(?, ?, ?,'', ?, ?, ?, 0, 1, 0,0, 0)",
+                "feedback, cur_page, last_rec_id, last_rec_seen, last_msg_id) VALUES(?, ?, ?,'', ?, ?, ?, 0, 1, -1, -1, -1)",
                 (user_id, data['age'], data["sex"], data["creation_time"], data["kids_flag"], data["pets_flag"]))
             db.commit()
     else:
@@ -70,7 +67,8 @@ def load_users_data():
         "SELECT * FROM users",
         db,
         dtype={'user_id': np.uint64, 'age': np.uint64, 'sex': str, 'timestamp': str, 'categories': str,
-               'kids_flag': np.uint64, 'pets_flag': np.uint64, 'feedback': np.uint64, 'cur_page': np.uint64}
+               'kids_flag': np.uint64, 'pets_flag': np.uint64, 'feedback': np.uint64, 'cur_page': np.uint64,
+               'last_rec_id': np.int64, 'last_rec_seen': np.int64, 'last_msg_id': np.int64}
     ).set_index("user_id")
     return df
 

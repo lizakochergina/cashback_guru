@@ -103,17 +103,20 @@ async def process_subject_callback(callback_query: types.CallbackQuery):
 
 
 async def show_recs(user_id):
-    rec_item_id = data_manager.get_recs(user_id)
-
-    if not rec_item_id:
-        await bot.send_message(user_id, "Пока что на этом все!")
-        return
-
-    img_url, category, text_info = data_manager.get_item_data(rec_item_id)
     last_seen_rec = await db.check_last_seen_rec(user_id)
+
     if last_seen_rec[1] == 0:
+        rec_item_id = last_seen_rec[0]
         img_url, category, text_info = data_manager.get_item_data(last_seen_rec[0])
     else:
+        rec_item_id = data_manager.get_recs(user_id)
+
+        if not rec_item_id:
+            await bot.send_message(user_id, "Пока что на этом все!")
+            return
+
+        img_url, category, text_info = data_manager.get_item_data(rec_item_id)
+        data_manager.write_last_seen(user_id, rec_item_id)
         await db.write_rec_id(user_id, rec_item_id)
 
     keyboard = InlineKeyboardMarkup()
@@ -124,6 +127,7 @@ async def show_recs(user_id):
     with open(img_url, 'rb') as photo:
         photo = InputFile(photo)
         message = await bot.send_photo(user_id, photo, caption=text_info, reply_markup=keyboard)
+        data_manager.write_last_seen_msg_id(user_id, message.message_id)
         await db.write_msg_id(user_id, message.message_id)
 
 
@@ -137,6 +141,7 @@ async def show_recs_from_callback(callback_query: types.CallbackQuery):
 async def process_callback_button(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     button_number, item_id = callback_query.data.split(":")
+    data_manager.mark_last_seen(user_id)
     await db.mark_last_rec(user_id)
     if button_number[-1] == '1':
         db.write_feedback(user_id, int(item_id), 0, callback_query.message.date)

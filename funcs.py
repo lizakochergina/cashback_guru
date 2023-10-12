@@ -34,7 +34,7 @@ class DataManager:
         else:
             model = EASE()
             model.fit(self.interactions, self.items)
-            return model.predict(user_id, self.interactions)
+            return model.predict(user_id, self.interactions, k)
 
     def get_item_data(self, item_id):
         row = self.items.loc[self.items['item_id'] == item_id]
@@ -46,6 +46,15 @@ class DataManager:
         liked = int(user_interactions['feedback'].sum())
         disliked = int(total - liked)
         return total, liked, disliked
+
+    def write_last_seen(self, user_id, item_id):
+        self.users.loc[user_id, ['last_rec_id', 'last_rec_seen']] = [item_id, 0]
+
+    def write_last_seen_msg_id(self, user_id, msg_id):
+        self.users.loc[user_id, 'last_msg_id'] = msg_id
+
+    def mark_last_seen(self, user_id):
+        self.users.loc[user_id, 'last_rec_seen'] = 1
 
     def add_interaction(self, user_id, item_id, feedback, timestamp):
         n = len(self.interactions)
