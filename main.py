@@ -110,6 +110,11 @@ async def show_recs(user_id):
         return
 
     img_url, category, text_info = data_manager.get_item_data(rec_item_id)
+    last_seen_rec = await db.check_last_seen_rec(user_id)
+    if last_seen_rec[1] == 0:
+        img_url, category, text_info = data_manager.get_item_data(last_seen_rec[0])
+    else:
+        await db.write_rec_id(user_id, rec_item_id)
 
     keyboard = InlineKeyboardMarkup()
     button1 = InlineKeyboardButton("💔", callback_data=f"button1:{rec_item_id}")
@@ -131,6 +136,7 @@ async def show_recs_from_callback(callback_query: types.CallbackQuery):
 async def process_callback_button(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     button_number, item_id = callback_query.data.split(":")
+    await db.mark_last_rec(user_id)
     if button_number[-1] == '1':
         db.write_feedback(user_id, int(item_id), 0, callback_query.message.date)
         data_manager.add_interaction(user_id, int(item_id), 0, callback_query.message.date)

@@ -15,7 +15,7 @@ async def db_connect():
             "timestamp TEXT, kids_flag INTEGER, pets_flag INTEGER, feedback INTEGER, cur_page INTEGER)"
     query2 = "CREATE TABLE IF NOT EXISTS items(item_id INTEGER, cashback TEXT, condition TEXT, exp_date_txt TEXT, category TEXT, brand TEXT, first_time INTEGER, text_info TEXT, img_url TEXT)"
     query3 = "CREATE TABLE IF NOT EXISTS interactions(user_id INTEGER, item_id INTEGER, feedback TEXT, timestamp TEXT," \
-             "PRIMARY KEY (user_id, item_id))"
+             "PRIMARY KEY (user_id, item_id, timestamp))"
     cursor.execute(query)
     cursor.execute(query2)
     cursor.execute(query3)
@@ -38,7 +38,7 @@ async def create_profile(state, user_id):
         async with state.proxy() as data:
             cursor.execute(
                 "INSERT INTO users (user_id, age, sex, categories, timestamp, kids_flag, pets_flag,"
-                "feedback, cur_page) VALUES(?, ?, ?,'', ?, ?, ?, 0, 1)",
+                "feedback, cur_page, last_rec_id, last_rec_seen) VALUES(?, ?, ?,'', ?, ?, ?, 0, 1, 0,0)",
                 (user_id, data['age'], data["sex"], data["creation_time"], data["kids_flag"], data["pets_flag"]))
             db.commit()
     else:
@@ -80,8 +80,8 @@ def load_items_data():
         "SELECT * FROM items",
         db,
         dtype={'item_id': np.uint64, 'category': str, 'brand': str,
-                 'cashback': str, 'first_time': np.uint64, 'text_info': str,
-                 'exp_date_txt': str, 'img_url': str, 'condition': str})
+               'cashback': str, 'first_time': np.uint64, 'text_info': str,
+               'exp_date_txt': str, 'img_url': str, 'condition': str})
 
     # df = pd.read_csv('items.csv', dtype={'item_id': np.uint64, 'category': str, 'brand': str,
     #                                      'cashback': str, 'first_time': np.uint64, 'text_info': str,
@@ -113,8 +113,35 @@ async def save_current_page(user_id, page):
             page, user_id))
     db.commit()
 
+
 async def get_current_page(user_id):
     cur_page = cursor.execute(
         "SELECT cur_page FROM users WHERE user_id == '{key}'".format(
             key=user_id)).fetchone()[0]
     return cur_page
+
+
+async def get_interactions(user_id):
+    user_interactions = cursor.execute(
+        "SELECT * FROM interactions WHERE user_id == '{key}'".format(
+            key=user_id)).fetchall()
+    return user_interactions
+
+
+async def write_rec_id(user_id, item_id):
+    cursor.execute("UPDATE users SET last_rec_id = '{}', last_rec_seen = '{}' WHERE user_id = '{}'".format(
+        item_id, 0, user_id))
+    db.commit()
+
+
+async def mark_last_rec(user_id):
+    cursor.execute("UPDATE users SET last_rec_seen = '{}' WHERE user_id = '{}'".format(
+        1, user_id))
+    db.commit()
+
+
+async def check_last_seen_rec(user_id):
+    last_seen_info = cursor.execute(
+        "SELECT last_rec_id, last_rec_seen FROM users WHERE user_id == '{key}'".format(
+            key=user_id)).fetchone()
+    return last_seen_info
