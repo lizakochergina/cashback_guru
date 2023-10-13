@@ -42,6 +42,23 @@ categories = ['Еда и продукты', 'Одежда, обувь, аксе�
 categories_page1 = categories[:7]
 categories_page2 = categories[7:]
 
+emoji_categories = {
+    'Еда и продукты': '🍜',
+    'Дом и ремонт': '🛠',
+    'Одежда, обувь, аксессуары':'🛍',
+    'Путешествия': '🛩',
+    'Аптеки и медицина': '💊',
+    'Услуги и сервис': '📦',
+    'Электроника': '📱',
+    'Кафе, бары и рестораны': '🍸',
+    'Книги, кино, искусство': '🩰',
+    'Авто': '🚗',
+    'Цветы и подарки': '💐',
+    'Товары для детей': '🍼',
+    'Такси и каршеринг': '🚕',
+    'Товары для животных': '🦄'
+}
+
 
 async def create_subjects_keyboard(user_id, page):
     keyboard = InlineKeyboardMarkup()
@@ -105,10 +122,12 @@ async def process_subject_callback(callback_query: types.CallbackQuery):
 
 
 async def show_recs(user_id):
+    print('show rec for', user_id)
+
     last_seen_rec = await db.check_last_seen_rec(user_id)
     if last_seen_rec[1] == 0:
         rec_item_id = last_seen_rec[0]
-        img_url, category, text_info = data_manager.get_item_data(last_seen_rec[0])
+        img_url, category, text_info, cashback, condition, exp_date_txt, brand = data_manager.get_item_data(last_seen_rec[0])
     else:
         rec_item_id = data_manager.get_recs(user_id)
 
@@ -116,7 +135,7 @@ async def show_recs(user_id):
             await bot.send_message(user_id, "Пока что на этом все!")
             return
 
-        img_url, category, text_info = data_manager.get_item_data(rec_item_id)
+        img_url, category, text_info, cashback, condition, exp_date_txt, brand = data_manager.get_item_data(rec_item_id)
         data_manager.write_last_seen(user_id, rec_item_id)
         await db.write_rec_id(user_id, rec_item_id)
 
@@ -125,9 +144,16 @@ async def show_recs(user_id):
     button2 = InlineKeyboardButton("❤", callback_data=f"button2:{rec_item_id}")
     keyboard.add(button1, button2)
 
+    brand_info = f'<b>{brand}</b>\n'
+    text_info = (text_info + '\n') if text_info is not None else ''
+    categ_info = emoji_categories[category] + ' ' + category + '\n'
+    cond_info = ('❗' + ' ' + condition + '\n') if condition is not None else ''
+    exp_info = ('⏳' + ' ' + exp_date_txt) if exp_date_txt is not None else ''
+    msg_text = brand_info + text_info + categ_info + cond_info + exp_info
+
     with open(img_url, 'rb') as photo:
         photo = InputFile(photo)
-        message = await bot.send_photo(user_id, photo, caption=text_info, reply_markup=keyboard)
+        message = await bot.send_photo(user_id, photo, caption=msg_text, reply_markup=keyboard, parse_mode='HTML')
         data_manager.write_last_seen_msg_id(user_id, message.message_id)
         await db.write_msg_id(user_id, message.message_id)
 
@@ -160,6 +186,7 @@ async def process_start_command(message: types.Message):
     user_id = message.from_user.id
     if await db.user_exists(user_id):
         # send recs
+        print('old user connects', user_id)
         last_msg_id = await db.get_last_msg_id(user_id)
         last_msg_id = last_msg_id[0]
         if last_msg_id != -1:
@@ -169,6 +196,7 @@ async def process_start_command(message: types.Message):
         await bot.send_message(message.from_user.id, "Рад видеть тебя снова! Лови новые кэшбеки 💸💸💸")
         await show_recs(message.from_user.id)
     else:
+        print('new user connects', user_id)
         await bot.send_message(message.from_user.id, "Привет!\nДля начала мне нужно узнать кое-что о тебе.")
         await message.answer("Укажи свой возраст:\n")
         await Profile.age.set()
@@ -200,7 +228,6 @@ async def get_gender(message, state):
         async with state.proxy() as data:
             data['sex'] = message.text
             data_manager.add_sex(user_id, message.text)
-        buttons = ReplyKeyboardRemove()
         yes = KeyboardButton('Да')
         no = KeyboardButton('Нет')
         buttons = ReplyKeyboardMarkup(one_time_keyboard=True)
@@ -242,9 +269,6 @@ async def get_kids(message, state):
             data_manager.add_kids(user_id, val)
             data_manager.add_time(user_id, message.date)
         await db.create_profile(state, user_id=message.from_user.id)
-        # fill_categories = KeyboardButton("Выбрать любимые категории")
-        # buttons = ReplyKeyboardMarkup(one_time_keyboard=True)
-        # buttons.add(fill_categories)
 
         await state.finish()
 
@@ -257,15 +281,6 @@ async def get_kids(message, state):
         await db.save_current_page(user_id, page=1)
     else:
         await message.answer("Пожалуйста, нажми на одну из кнопок")
-    # user_id = message.from_user.id
-    # async with state.proxy() as data:
-    #     val = 1 if message.text == 'Да' else 0
-    #     data['kids_flag'] = val
-    #     data['creation_time'] = message.date
-    #     data_manager.add_kids(user_id, val)
-    #     data_manager.add_time(user_id, message.date)
-    # await db.create_profile(state, user_id=message.from_user.id)
-    # await state.finish()
 
 
 @dp.message_handler(commands=['help'])
