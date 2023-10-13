@@ -6,8 +6,10 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import db
 from funcs import DataManager
+import time
+import asyncio
 
-TOKEN = '6436284246:AAEb8aEUhFvIegTMMa77mJ2gxYCQJDiuujc'
+TOKEN = '1859711813:AAHpBzR1-iV6wCpAZH1Y6D75GuRIrKjslwA'
 
 bot = Bot(token=TOKEN)
 print('created bot')
@@ -104,7 +106,6 @@ async def process_subject_callback(callback_query: types.CallbackQuery):
 
 async def show_recs(user_id):
     last_seen_rec = await db.check_last_seen_rec(user_id)
-
     if last_seen_rec[1] == 0:
         rec_item_id = last_seen_rec[0]
         img_url, category, text_info = data_manager.get_item_data(last_seen_rec[0])
@@ -280,5 +281,33 @@ async def process_help_command(message: types.Message):
     await bot.send_message(user_id, msg)
 
 
+async def send_message():
+    users = await db.get_all_ids()
+    message = "Привет! Давно тебя не было, лови новые рекомендации."
+    for user in users:
+        user_id = user[0]
+        last_msg_id = await db.get_last_msg_id(user_id)
+        last_seen_flag = await db.check_last_seen_rec(user_id)
+        if last_msg_id[0] != -1 and last_seen_flag[1] == 0:
+            await bot.delete_message(chat_id=user_id, message_id=last_msg_id[0])
+            await db.write_msg_id(user_id, -1)
+            data_manager.write_last_seen_msg_id(user_id, -1)
+        await bot.send_message(int(user[0]), message)
+        await show_recs(int(user[0]))
+
+
+async def schedule_message():
+    while True:
+        target_time = "12:36:00"
+        current_time = time.strftime("%H:%M:%S")
+
+        if target_time == current_time:
+            await send_message()
+
+        await asyncio.sleep(1)
+
+
 if __name__ == '__main__':
+    asyncio.ensure_future(schedule_message())
+
     executor.start_polling(dp, on_startup=on_startup, skip_updates=True)
