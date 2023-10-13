@@ -38,7 +38,7 @@ class DataManager:
 
     def get_item_data(self, item_id):
         row = self.items.loc[self.items['item_id'] == item_id]
-        return row['img_url'].values[0], row['category'].values[0], row['text_info'].values[0]
+        return row['img_url'].values[0], row['category'].values[0], row['text_info'].values[0], row['cashback'].values[0], row['condition'].values[0], row['exp_date_txt'].values[0], row['brand'].values[0]
 
     def get_stats(self, user_id):
         user_interactions = self.interactions[self.interactions['user_id'] == user_id]
