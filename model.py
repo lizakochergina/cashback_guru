@@ -13,7 +13,11 @@ class StupidRecommender:
         pass
 
     def predict(self, user_id, users, items, interactions, k=1):
-        users_fav_categories = users.loc[user_id, 'categories'].split(";")
+        users_fav_categories = users.loc[user_id, 'categories']
+        if pd.isna(users_fav_categories):
+            users_fav_categories = []
+        else:
+            users_fav_categories = users_fav_categories.split(';')
         if users.loc[user_id, 'kids_flag'] == 1:
             users_fav_categories.append('Товары для детей')
         if users.loc[user_id, 'pets_flag'] == 1:
@@ -46,7 +50,7 @@ class EASE:
         self.user_encoder = None
         self.item_encoder = None
         self.window = window
-        self.n_items = 117
+        self.n_items = 116
         self.item_encoder = LabelEncoder().fit(np.arange(self.n_items))
 
     def fit(
@@ -62,8 +66,11 @@ class EASE:
         user_ids = self.user_encoder.transform(df.loc[uniq_ids, user_col])
         item_ids = self.item_encoder.transform(df.loc[uniq_ids, item_col])
 
-        counts = np.ones(len(uniq_ids))
+        # counts = np.ones(len(uniq_ids))
         # counts = df.loc[uniq_ids, value_col].values
+        vals = df.loc[uniq_ids]
+        vals.loc[vals[value_col] == 0, value_col] = -1
+        counts = vals[value_col].values
 
         n_users = df[user_col].nunique()
         matrix_shape = n_users, self.n_items
@@ -88,8 +95,10 @@ class EASE:
         scores = self.interaction_matrix[encoded_user_id, :] @ self.item_similarity
         ids = np.argsort(-scores, axis=-1)
         orig_item_ids = self.item_encoder.inverse_transform(np.array(ids)[0])
+        # print('all ids' orig_item_ids[:5], len(orig_item_ids)) 
 
         used_items = interactions.loc[interactions['user_id'] == user_id, 'item_id'].drop_duplicates(keep='last')
+        used_items = used_items[-self.window:]
         filtered_items = np.setdiff1d(orig_item_ids, used_items, assume_unique=True)
 
         if k == 1:

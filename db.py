@@ -67,8 +67,8 @@ def load_users_data():
         "SELECT * FROM users",
         db,
         dtype={'user_id': np.uint64, 'age': np.uint64, 'sex': str, 'timestamp': str, 'categories': str,
-               'kids_flag': np.uint64, 'pets_flag': np.uint64, 'feedback': np.uint64, 'cur_page': np.uint64,
-               'last_rec_id': np.int64, 'last_rec_seen': np.int64, 'last_msg_id': np.uint64}
+               'kids_flag': np.uint64, 'pets_flag': np.uint64, 'feedback': np.int64, 'cur_page': np.uint64,
+               'last_rec_id': np.int64, 'last_rec_seen': np.int64, 'last_msg_id': np.int64}
     ).set_index("user_id")
     return df
 
@@ -91,7 +91,7 @@ def load_interactions_data():
     df = pd.read_sql_query(
         "SELECT * FROM interactions",
         db,
-        dtype={'user_id': np.uint64, 'item_id': np.uint64, 'feedback': np.uint64, 'timestamp': str})
+        dtype={'user_id': np.uint64, 'item_id': np.uint64, 'feedback': np.int64, 'timestamp': str})
     return df
 
 

@@ -111,7 +111,7 @@ async def show_recs(user_id):
     else:
         rec_item_id = data_manager.get_recs(user_id)
 
-        if not rec_item_id:
+        if rec_item_id is None:
             await bot.send_message(user_id, "Пока что на этом все!")
             return
 
@@ -144,8 +144,8 @@ async def process_callback_button(callback_query: types.CallbackQuery):
     data_manager.mark_last_seen(user_id)
     await db.mark_last_rec(user_id)
     if button_number[-1] == '1':
-        db.write_feedback(user_id, int(item_id), -1, callback_query.message.date)
-        data_manager.add_interaction(user_id, int(item_id), -1, callback_query.message.date)
+        db.write_feedback(user_id, int(item_id), 0, callback_query.message.date)
+        data_manager.add_interaction(user_id, int(item_id), 0, callback_query.message.date)
     elif button_number[-1] == '2':
         db.write_feedback(user_id, int(item_id), 1, callback_query.message.date)
         data_manager.add_interaction(user_id, int(item_id), 1, callback_query.message.date)
@@ -216,8 +216,9 @@ async def get_pets(message, state):
     if message.text.isalpha() and (message.text == "Да" or message.text == "Нет"):
         user_id = message.from_user.id
         async with state.proxy() as data:
-            data['pets_flag'] = 1 if message.text == 'Да' else 0
-            data_manager.add_kids(user_id, message.text)
+            val = 1 if message.text == 'Да' else 0
+            data['pets_flag'] = val
+            data_manager.add_pets(user_id, val)
         yes = KeyboardButton('Да')
         no = KeyboardButton('Нет')
         buttons = ReplyKeyboardMarkup(one_time_keyboard=True)
@@ -234,36 +235,36 @@ async def get_kids(message, state):
     if message.text.isalpha() and (message.text == "Да" or message.text == "Нет"):
         user_id = message.from_user.id
         async with state.proxy() as data:
-            data['kids_flag'] = 1 if message.text == 'Да' else 0
+            val = 1 if message.text == 'Да' else 0
+            data['kids_flag'] = val
             data['creation_time'] = message.date
-            data_manager.add_pets(user_id, message.text)
+            data_manager.add_kids(user_id, val)
             data_manager.add_time(user_id, message.date)
         await db.create_profile(state, user_id=message.from_user.id)
         # fill_categories = KeyboardButton("Выбрать любимые категории")
         # buttons = ReplyKeyboardMarkup(one_time_keyboard=True)
         # buttons.add(fill_categories)
 
-        msg = 'Осталось узнать твои предпочтения. Выбери несколько категорий, на основе которых мы построим тебе первые рекоммендации.'
-        # await message.answer(msg, reply_markup=buttons)
         await state.finish()
+
+        msg = 'Еще чуть-чуть и мы начинаем показывать тебе супер выгодные предложения.'
+        await bot.send_message(user_id, msg, reply_markup=ReplyKeyboardRemove())
+
+        msg = 'Выбери несколько категорий, на основе которых мы построим тебе первые рекоммендации.'
+        keyboard_page1 = await create_subjects_keyboard(user_id, page=1)
+        await message.answer(text=msg, reply_markup=keyboard_page1)
+        await db.save_current_page(user_id, page=1)
     else:
         await message.answer("Пожалуйста, нажми на одну из кнопок")
-    user_id = message.from_user.id
-    async with state.proxy() as data:
-        data['kids_flag'] = 1 if message.text == 'Да' else 0
-        data['creation_time'] = message.date
-        data_manager.add_pets(user_id, message.text)
-        data_manager.add_time(user_id, message.date)
-    await db.create_profile(state, user_id=message.from_user.id)
-    await state.finish()
-
-    msg = 'Еще чуть-чуть и мы начинаем показывать тебе супер выгодные предложения.'
-    await bot.send_message(user_id, msg, reply_markup=ReplyKeyboardRemove())
-
-    msg = 'Выбери несколько категорий, на основе которых мы построим тебе первые рекоммендации.'
-    keyboard_page1 = await create_subjects_keyboard(user_id, page=1)
-    await message.answer(text=msg, reply_markup=keyboard_page1)
-    await db.save_current_page(user_id, page=1)
+    # user_id = message.from_user.id
+    # async with state.proxy() as data:
+    #     val = 1 if message.text == 'Да' else 0
+    #     data['kids_flag'] = val
+    #     data['creation_time'] = message.date
+    #     data_manager.add_kids(user_id, val)
+    #     data_manager.add_time(user_id, message.date)
+    # await db.create_profile(state, user_id=message.from_user.id)
+    # await state.finish()
 
 
 @dp.message_handler(commands=['help'])

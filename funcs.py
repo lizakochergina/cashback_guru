@@ -74,7 +74,7 @@ class DataManager:
         self.users.loc[user_id, 'kids_flag'] = kids
 
     def add_pets(self, user_id, pets):
-        self.users.loc[user_id, 'pets'] = pets
+        self.users.loc[user_id, 'pets_plag'] = pets
 
     def add_time(self, user_id, timestamp):
         self.users.loc[user_id, 'timestamp'] = timestamp
