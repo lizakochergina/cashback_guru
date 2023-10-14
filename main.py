@@ -6,8 +6,9 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import db
 from funcs import DataManager
+import pandas as pd
 
-TOKEN = '1859711813:AAHpBzR1-iV6wCpAZH1Y6D75GuRIrKjslwA'
+TOKEN = '6436284246:AAEb8aEUhFvIegTMMa77mJ2gxYCQJDiuujc'
 
 bot = Bot(token=TOKEN)
 print('created bot')
@@ -54,7 +55,8 @@ emoji_categories = {
     'Цветы и подарки': '💐',
     'Товары для детей': '🍼',
     'Такси и каршеринг': '🚕',
-    'Товары для животных': '🦄'
+    'Товары для животных': '🦄',
+    'Обучение': '📚'
 }
 
 
@@ -130,7 +132,7 @@ async def show_recs(user_id):
     else:
         rec_item_id = data_manager.get_recs(user_id)
 
-        if rec_item_id is None:
+        if rec_item_id == -1:
             await bot.send_message(user_id, "Пока что на этом все!")
             return
 
@@ -144,10 +146,10 @@ async def show_recs(user_id):
     keyboard.add(button1, button2)
 
     brand_info = f'<b>{brand}</b>\n'
-    text_info = (text_info + '\n') if text_info is not None else ''
+    text_info = (text_info + '\n') if text_info != '-' else ''
     categ_info = emoji_categories[category] + ' ' + category + '\n'
-    cond_info = ('❗' + ' ' + condition + '\n') if condition is not None else ''
-    exp_info = ('⏳' + ' ' + exp_date_txt) if exp_date_txt is not None else ''
+    cond_info = ('❗' + ' ' + condition + '\n') if condition != '-' else ''
+    exp_info = ('⏳' + ' ' + exp_date_txt) if exp_date_txt != '-' else ''
     msg_text = brand_info + text_info + categ_info + cond_info + exp_info
 
     with open(img_url, 'rb') as photo:
@@ -189,8 +191,11 @@ async def process_start_command(message: types.Message):
         last_msg_id = await db.get_last_msg_id(user_id)
         last_msg_id = last_msg_id[0]
         if last_msg_id != -1:
-            await bot.delete_message(chat_id=message.chat.id, message_id=last_msg_id)
-            await db.write_msg_id(user_id, -1)
+            try:
+                await bot.delete_message(chat_id=message.chat.id, message_id=last_msg_id)
+                await db.write_msg_id(user_id, -1)
+            except:
+                pass
             data_manager.write_last_seen_msg_id(user_id, -1)
         await bot.send_message(message.from_user.id, "Рад видеть тебя снова! Лови новые кэшбеки 💸💸💸")
         await show_recs(message.from_user.id)

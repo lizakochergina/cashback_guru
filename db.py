@@ -81,8 +81,6 @@ def load_items_data():
                'cashback': str, 'first_time': np.uint64, 'text_info': str,
                'exp_date_txt': str, 'img_url': str, 'condition': str})
 
-    df['text_info'].fillna('', inplace=True)
-
     # df = pd.read_csv('items.csv', dtype={'item_id': np.uint64, 'category': str, 'brand': str,
     #                                      'cashback': str, 'first_time': np.uint64, 'text_info': str,
     #                                      'exp_date_txt': str, 'img_url': str, 'condition': str})

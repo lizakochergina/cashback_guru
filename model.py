@@ -36,13 +36,13 @@ class StupidRecommender:
         filtered_items = np.setdiff1d(sampled_items, used_items, assume_unique=True)
 
         if k == 1:
-            return filtered_items[0] if len(filtered_items) else None
+            return filtered_items[0] if len(filtered_items) else -1
         else:
             return filtered_items[:k]
 
 
 class EASE:
-    def __init__(self, reg: float = 0.01, window=30) -> None:
+    def __init__(self, reg: float = 0.01, window=80) -> None:
         self.reg = reg
         self.trained = False
         self.item_similarity = None
@@ -102,6 +102,6 @@ class EASE:
         filtered_items = np.setdiff1d(orig_item_ids, used_items, assume_unique=True)
 
         if k == 1:
-            return filtered_items[0] if len(filtered_items) else None
+            return filtered_items[0] if len(filtered_items) else -1
         else:
             return filtered_items[:k]
