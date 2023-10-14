@@ -158,3 +158,8 @@ async def get_last_msg_id(user_id):
         "SELECT last_msg_id FROM users WHERE user_id == '{key}'".format(
             key=user_id)).fetchone()
     return last_seen_info
+
+
+async def get_all_ids():
+    users = cursor.execute("SELECT user_id FROM users").fetchall()
+    return users
