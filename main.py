@@ -10,7 +10,7 @@ import pandas as pd
 import time
 import asyncio
 
-TOKEN = '6436284246:AAEb8aEUhFvIegTMMa77mJ2gxYCQJDiuujc'
+TOKEN = ''
 
 bot = Bot(token=TOKEN)
 print('created bot')
