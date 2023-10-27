@@ -1,5 +1,6 @@
-# cashback_guru
+# cashback guru ![image](https://github.com/lizakochergina/cashback_guru/assets/78104489/510ea50f-a162-4d9a-b464-346062c15751)
 
-This Telegram bot (@cashback_guru_bot, not active now) can recommend you some profitable cashback from Tinkoff. The feed is adjusted by your feeadback, so you get personalizer recommendations.
+
+This Telegram bot (@cashback_guru_bot, not active now) can recommend you a profitable cashback from Tinkoff.The feed is adjusted by your feedback, so you get personalized recommendations.
 
 We used aiogram API and EASE model for recommendations.
